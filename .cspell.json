@@ -42,7 +42,7 @@
     },
     {
       "filename": "**/{*.cpp,*.hpp}",
-      "ignoreRegExpList": ["@author .*$", "[\\@]tparam", "\\author .*$", "Author(s)?( )?: .*$"]
+      "ignoreRegExpList": ["@author .*$", "[\\@]tparam", "\\author .*$", "Author(s)?( )?: .*$", "TODO\\((.*?)\\)"]
     }
   ],
   "words": [
@@ -52,6 +52,7 @@
     "autocompute",
     "automotiveaichallenge",
     "autoware",
+    "awsim",
     "buildtool",
     "colcon",
     "costmap",
@@ -72,6 +73,8 @@
     "libgazebo",
     "libgl",
     "linalg",
+    "lowpass",
+    "mapfile",
     "mathcal",
     "mgrs",
     "odometry",
