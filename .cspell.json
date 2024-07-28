@@ -47,6 +47,7 @@
   ],
   "words": [
     "ackermann",
+    "adapi",
     "aichallenge",
     "autocompute",
     "automotiveaichallenge",
@@ -63,6 +64,7 @@
     "freespace",
     "gnss",
     "gnucxx",
+    "gtest",
     "initialpose",
     "lanechange",
     "lanefollowing",
@@ -71,6 +73,7 @@
     "libgl",
     "linalg",
     "mathcal",
+    "mgrs",
     "odometry",
     "osrf",
     "pitstop",
@@ -85,6 +88,7 @@
     "rviz",
     "schematypens",
     "sideshift",
+    "srvs",
     "stddev",
     "traj",
     "urdf",
@@ -93,6 +97,7 @@
     "wmctrl",
     "wpedantic",
     "xacro",
+    "xyzrpy",
     "zcvf"
   ]
 }
