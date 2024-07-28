@@ -1,5 +1,6 @@
 {
   "ignorePaths": [
+    "**/*.bash",
     "**/*.cspell.json",
     "**/*.dae",
     "**/*.html",
