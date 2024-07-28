@@ -1,11 +1,14 @@
 {
   "ignorePaths": [
+    "**/*.bash",
     "**/*.cspell.json",
     "**/*.dae",
     "**/*.html",
     "**/*.mp3",
     "**/*.mp4",
     "**/*.pcd",
+     "**/*.rviz",
+    "**/*.sh",
     "**/*.stl",
     "**/*.svg",
     "**/*.wav",
