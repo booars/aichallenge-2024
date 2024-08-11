@@ -14,6 +14,8 @@
 
 #include "costmap_generator/global_costmap_generator.hpp"
 
+#include <lanelet2_extension/utility/message_conversion.hpp>
+
 namespace costmap_generator
 {
 GlobalCostmapGenerator::GlobalCostmapGenerator(const rclcpp::NodeOptions & options)
@@ -48,14 +50,16 @@ void GlobalCostmapGenerator::update()
 {
   // Check if map is available
   if (!map_) {
-    RCLCPP_WARN(get_logger(), "No map received yet");
+    RCLCPP_WARN_THROTTLE(get_logger(), *get_clock(), 1000, "No map received yet");
     return;
   }
 }
 
 void GlobalCostmapGenerator::map_callback(const HADMapBin::SharedPtr msg)
 {
-  map_ = msg;
+  RCLCPP_INFO(get_logger(), "Received map");
+  map_ = std::make_shared<lanelet::LaneletMap>();
+  lanelet::utils::conversion::fromBinMsg(*msg, map_);
 }
 
 }  // namespace costmap_generator

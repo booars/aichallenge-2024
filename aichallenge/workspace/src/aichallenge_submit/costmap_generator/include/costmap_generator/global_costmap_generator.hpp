@@ -21,6 +21,8 @@
 #include <autoware_auto_mapping_msgs/msg/had_map_bin.hpp>
 #include <nav_msgs/msg/occupancy_grid.hpp>
 
+#include <lanelet2_core/LaneletMap.h>
+
 namespace costmap_generator
 {
 
@@ -42,7 +44,7 @@ private:
   FunctionTimer::SharedPtr update_timer_;
 
   HADMapBinSubscription::SharedPtr map_sub_;
-  HADMapBin::SharedPtr map_;
+  lanelet::LaneletMapPtr map_;
 
   OccupancyGridPublisher::SharedPtr costmap_pub_;
 };
