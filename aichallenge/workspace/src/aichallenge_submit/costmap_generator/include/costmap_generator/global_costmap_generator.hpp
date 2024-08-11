@@ -15,6 +15,7 @@
 #ifndef COSTMAP_GENERATOR__GLOBAL_COSTMAP_GENERATOR_HPP_
 #define COSTMAP_GENERATOR__GLOBAL_COSTMAP_GENERATOR_HPP_
 
+#include <booars_utils/ros/function_timer.hpp>
 #include <rclcpp/rclcpp.hpp>
 
 #include <autoware_auto_mapping_msgs/msg/had_map_bin.hpp>
@@ -24,6 +25,7 @@ namespace costmap_generator
 
 class GlobalCostmapGenerator : public rclcpp::Node
 {
+  using FunctionTimer = booars_utils::ros::FunctionTimer;
   using HADMapBin = autoware_auto_mapping_msgs::msg::HADMapBin;
   using HADMapBinSubscription = rclcpp::Subscription<HADMapBin>;
 
@@ -31,7 +33,10 @@ public:
   explicit GlobalCostmapGenerator(const rclcpp::NodeOptions & options);
 
 private:
+  void update();
   void map_callback(const HADMapBin::SharedPtr msg);
+
+  FunctionTimer::SharedPtr update_timer_;
 
   HADMapBinSubscription::SharedPtr had_map_bin_sub_;
   HADMapBin::SharedPtr map_;

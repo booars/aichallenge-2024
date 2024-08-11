@@ -19,9 +19,32 @@ namespace costmap_generator
 GlobalCostmapGenerator::GlobalCostmapGenerator(const rclcpp::NodeOptions & options)
 : Node("global_costmap_generator", options)
 {
-  had_map_bin_sub_ = this->create_subscription<HADMapBin>(
-    "~/input/map", 1,
-    std::bind(&GlobalCostmapGenerator::map_callback, this, std::placeholders::_1));
+  // Declare parameters
+  double update_rate;
+  {
+    update_rate = this->declare_parameter("update_rate", 20.0);
+  }
+
+  // Create subscriptions
+  {
+    had_map_bin_sub_ = this->create_subscription<HADMapBin>(
+      "~/input/map", 1,
+      std::bind(&GlobalCostmapGenerator::map_callback, this, std::placeholders::_1));
+  }
+
+  // Create function timers
+  {
+    update_timer_ = FunctionTimer::create_function_timer(
+      this, update_rate, std::bind(&GlobalCostmapGenerator::update, this));
+  }
+}
+
+void GlobalCostmapGenerator::update()
+{
+  if (!map_) {
+    RCLCPP_WARN(get_logger(), "No map received yet");
+    return;
+  }
 }
 
 void GlobalCostmapGenerator::map_callback(const HADMapBin::SharedPtr msg)
