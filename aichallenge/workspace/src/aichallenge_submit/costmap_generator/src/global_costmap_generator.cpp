@@ -30,7 +30,7 @@ GlobalCostmapGenerator::GlobalCostmapGenerator(const rclcpp::NodeOptions & optio
   double update_rate;
   {
     update_rate = this->declare_parameter("update_rate", 20.0);
-    costmap_center_frame_id_ = this->declare_parameter("costmap_frame_id", "base_link");
+    costmap_center_frame_id_ = this->declare_parameter("costmap_center_frame_id", "base_link");
 
     double costmap_width = this->declare_parameter("costmap_width", 20.0);
     double costmap_resolution = this->declare_parameter("costmap_resolution", 0.1);
@@ -65,13 +65,14 @@ void GlobalCostmapGenerator::update()
   }
 
   // Get the transform from the map frame to the costmap frame
-  geometry_msgs::msg::Vector3 costmap_center_position;
+  Vector3 costmap_center_position;
   {
     geometry_msgs::msg::TransformStamped transform;
     try {
-      transform = tf_buffer_.lookupTransform(costmap_center_frame_id_, "map", tf2::TimePointZero);
+      transform = tf_buffer_.lookupTransform("map", costmap_center_frame_id_, tf2::TimePointZero);
     } catch (tf2::TransformException & ex) {
-      RCLCPP_WARN(get_logger(), "Could not get transform: %s", ex.what());
+      RCLCPP_WARN_THROTTLE(
+        get_logger(), *get_clock(), 1000, "Could not get transform %s", ex.what());
       return;
     }
     costmap_center_position = transform.transform.translation;
@@ -79,10 +80,45 @@ void GlobalCostmapGenerator::update()
 
   // Get the intersected lanelets
   lanelet::ConstLanelets intersected_lanelets = get_intersected_lanelets(costmap_center_position);
+
+  // Create the costmap
+  OccupancyGrid costmap;
+  {
+    costmap.info.width = costmap_parameters_->grid_width();
+    costmap.info.height = costmap_parameters_->grid_width();
+    costmap.info.resolution = costmap_parameters_->resolution();
+    costmap.info.origin.position.x = costmap_center_position.x - costmap_parameters_->width_2();
+    costmap.info.origin.position.y = costmap_center_position.y - costmap_parameters_->width_2();
+    costmap.info.origin.position.z = 0.0;
+    costmap.info.origin.orientation.x = 0.0;
+    costmap.info.origin.orientation.y = 0.0;
+    costmap.info.origin.orientation.z = 0.0;
+    costmap.info.origin.orientation.w = 1.0;
+  }
+
+  // Fill the costmap
+  {
+    costmap.data.resize(costmap_parameters_->grid_num(), 100);
+    for (int i = 0; i < costmap_parameters_->grid_num(); i++) {
+      Point2d cell_position = get_cell_position(costmap_center_position, i);
+      for (const auto & lanelet : intersected_lanelets) {
+        if (boost::geometry::within(cell_position, lanelet.polygon2d().basicPolygon())) {
+          costmap.data[i] = 0;
+          break;
+        }
+      }
+    }
+  }
+
+  // Publish the costmap
+  {
+    costmap.header.stamp = now();
+    costmap.header.frame_id = "map";
+    costmap_pub_->publish(costmap);
+  }
 }
 
-lanelet::ConstLanelets GlobalCostmapGenerator::get_intersected_lanelets(
-  const geometry_msgs::msg::Vector3 & center)
+lanelet::ConstLanelets GlobalCostmapGenerator::get_intersected_lanelets(const Vector3 & center)
 {
   LinearRing2d costmap_contour = get_costmap_contour(center);
   lanelet::ConstLanelets intersected_lanelets;
@@ -95,7 +131,7 @@ lanelet::ConstLanelets GlobalCostmapGenerator::get_intersected_lanelets(
 }
 
 tier4_autoware_utils::LinearRing2d GlobalCostmapGenerator::get_costmap_contour(
-  const geometry_msgs::msg::Vector3 & center)
+  const Vector3 & center)
 {
   LinearRing2d costmap_contour;
   costmap_contour.push_back(
@@ -109,6 +145,16 @@ tier4_autoware_utils::LinearRing2d GlobalCostmapGenerator::get_costmap_contour(
   costmap_contour.push_back(
     {center.x - costmap_parameters_->width_2(), center.y - costmap_parameters_->width_2()});
   return costmap_contour;
+}
+
+tier4_autoware_utils::Point2d GlobalCostmapGenerator::get_cell_position(
+  const Vector3 & costmap_origin, const int & index)
+{
+  const int x = index % costmap_parameters_->grid_width();
+  const int y = index / costmap_parameters_->grid_width();
+  return {
+    costmap_origin.x + x * costmap_parameters_->resolution() - costmap_parameters_->width_2(),
+    costmap_origin.y + y * costmap_parameters_->resolution() - costmap_parameters_->width_2()};
 }
 
 void GlobalCostmapGenerator::map_callback(const HADMapBin::SharedPtr msg)

@@ -41,14 +41,17 @@ class GlobalCostmapGenerator : public rclcpp::Node
   using LinearRing2d = tier4_autoware_utils::LinearRing2d;
   using OccupancyGrid = nav_msgs::msg::OccupancyGrid;
   using OccupancyGridPublisher = rclcpp::Publisher<OccupancyGrid>;
+  using Point2d = tier4_autoware_utils::Point2d;
+  using Vector3 = geometry_msgs::msg::Vector3;
 
 public:
   explicit GlobalCostmapGenerator(const rclcpp::NodeOptions & options);
 
 private:
   void update();
-  lanelet::ConstLanelets get_intersected_lanelets(const geometry_msgs::msg::Vector3 & center);
-  LinearRing2d get_costmap_contour(const geometry_msgs::msg::Vector3 & center);
+  lanelet::ConstLanelets get_intersected_lanelets(const Vector3 & center);
+  LinearRing2d get_costmap_contour(const Vector3 & center);
+  Point2d get_cell_position(const Vector3 & costmap_origin, const int & index);
 
   void map_callback(const HADMapBin::SharedPtr msg);
 
