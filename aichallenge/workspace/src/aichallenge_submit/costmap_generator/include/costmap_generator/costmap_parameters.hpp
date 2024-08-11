@@ -40,6 +40,14 @@ public:
     grid_num_ = grid_width_ * grid_width_;
   }
 
+  double width() const { return width_; }
+  double width_2() const { return width_2_; }
+  double resolution() const { return resolution_; }
+  double resolution_inv() const { return resolution_inv_; }
+  int grid_width_2() const { return grid_width_2_; }
+  int grid_width() const { return grid_width_; }
+  int grid_num() const { return grid_num_; }
+
 private:
   double width_;
   double width_2_;
