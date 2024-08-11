@@ -9,12 +9,9 @@
 
   <buildtool_depend>ament_cmake_auto</buildtool_depend>
 
-  <!-- <depend>autoware_adapi_v1_msgs</depend>
-  <depend>geometry_msgs</depend>
+  <depend>autoware_auto_mapping_msgs</depend>
   <depend>rclcpp</depend>
-  <depend>std_srvs</depend>
-  <depend>nav2_msgs</depend>
-  <depend>tier4_autoware_utils</depend> -->
+  <depend>rclcpp_components</depend>
 
   <export>
     <build_type>ament_cmake</build_type>
