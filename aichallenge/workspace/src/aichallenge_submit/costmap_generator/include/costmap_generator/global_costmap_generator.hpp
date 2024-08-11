@@ -15,13 +15,20 @@
 #ifndef COSTMAP_GENERATOR__GLOBAL_COSTMAP_GENERATOR_HPP_
 #define COSTMAP_GENERATOR__GLOBAL_COSTMAP_GENERATOR_HPP_
 
+#include "costmap_generator/costmap_parameters.hpp"
+
 #include <booars_utils/ros/function_timer.hpp>
 #include <rclcpp/rclcpp.hpp>
+#include <tier4_autoware_utils/geometry/boost_geometry.hpp>
 
 #include <autoware_auto_mapping_msgs/msg/had_map_bin.hpp>
 #include <nav_msgs/msg/occupancy_grid.hpp>
 
 #include <lanelet2_core/LaneletMap.h>
+#include <tf2_ros/buffer.h>
+#include <tf2_ros/transform_listener.h>
+
+#include <string>
 
 namespace costmap_generator
 {
@@ -31,6 +38,7 @@ class GlobalCostmapGenerator : public rclcpp::Node
   using FunctionTimer = booars_utils::ros::FunctionTimer;
   using HADMapBin = autoware_auto_mapping_msgs::msg::HADMapBin;
   using HADMapBinSubscription = rclcpp::Subscription<HADMapBin>;
+  using LinearRing2d = tier4_autoware_utils::LinearRing2d;
   using OccupancyGrid = nav_msgs::msg::OccupancyGrid;
   using OccupancyGridPublisher = rclcpp::Publisher<OccupancyGrid>;
 
@@ -39,14 +47,24 @@ public:
 
 private:
   void update();
+  lanelet::ConstLanelets get_intersected_lanelets(const geometry_msgs::msg::Vector3 & center);
+  LinearRing2d get_costmap_contour(const geometry_msgs::msg::Vector3 & center);
+
   void map_callback(const HADMapBin::SharedPtr msg);
 
   FunctionTimer::SharedPtr update_timer_;
 
+  tf2_ros::Buffer tf_buffer_;
+  tf2_ros::TransformListener tf_listener_;
+
   HADMapBinSubscription::SharedPtr map_sub_;
   lanelet::LaneletMapPtr map_;
+  lanelet::ConstLanelets roads_;
 
   OccupancyGridPublisher::SharedPtr costmap_pub_;
+
+  std::string costmap_center_frame_id_;
+  CostmapParameters::SharedPtr costmap_parameters_;
 };
 }  // namespace costmap_generator
 

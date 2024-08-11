@@ -15,16 +15,26 @@
 #include "costmap_generator/global_costmap_generator.hpp"
 
 #include <lanelet2_extension/utility/message_conversion.hpp>
+#include <lanelet2_extension/utility/query.hpp>
+
+#include <boost/geometry/algorithms/intersects.hpp>
+
+#include <lanelet2_core/geometry/Polygon.h>
 
 namespace costmap_generator
 {
 GlobalCostmapGenerator::GlobalCostmapGenerator(const rclcpp::NodeOptions & options)
-: Node("global_costmap_generator", options)
+: Node("global_costmap_generator", options), tf_buffer_(get_clock()), tf_listener_(tf_buffer_)
 {
   // Declare parameters
   double update_rate;
   {
     update_rate = this->declare_parameter("update_rate", 20.0);
+    costmap_center_frame_id_ = this->declare_parameter("costmap_frame_id", "base_link");
+
+    double costmap_width = this->declare_parameter("costmap_width", 20.0);
+    double costmap_resolution = this->declare_parameter("costmap_resolution", 0.1);
+    costmap_parameters_ = CostmapParameters::create_parameters(costmap_width, costmap_resolution);
   }
 
   // Create subscriptions
@@ -53,13 +63,60 @@ void GlobalCostmapGenerator::update()
     RCLCPP_WARN_THROTTLE(get_logger(), *get_clock(), 1000, "No map received yet");
     return;
   }
+
+  // Get the transform from the map frame to the costmap frame
+  geometry_msgs::msg::Vector3 costmap_center_position;
+  {
+    geometry_msgs::msg::TransformStamped transform;
+    try {
+      transform = tf_buffer_.lookupTransform(costmap_center_frame_id_, "map", tf2::TimePointZero);
+    } catch (tf2::TransformException & ex) {
+      RCLCPP_WARN(get_logger(), "Could not get transform: %s", ex.what());
+      return;
+    }
+    costmap_center_position = transform.transform.translation;
+  }
+
+  // Get the intersected lanelets
+  lanelet::ConstLanelets intersected_lanelets = get_intersected_lanelets(costmap_center_position);
+}
+
+lanelet::ConstLanelets GlobalCostmapGenerator::get_intersected_lanelets(
+  const geometry_msgs::msg::Vector3 & center)
+{
+  LinearRing2d costmap_contour = get_costmap_contour(center);
+  lanelet::ConstLanelets intersected_lanelets;
+  for (const auto & road : roads_) {
+    if (boost::geometry::intersects(costmap_contour, road.polygon2d().basicPolygon())) {
+      intersected_lanelets.push_back(road);
+    }
+  }
+  return intersected_lanelets;
+}
+
+tier4_autoware_utils::LinearRing2d GlobalCostmapGenerator::get_costmap_contour(
+  const geometry_msgs::msg::Vector3 & center)
+{
+  LinearRing2d costmap_contour;
+  costmap_contour.push_back(
+    {center.x - costmap_parameters_->width_2(), center.y - costmap_parameters_->width_2()});
+  costmap_contour.push_back(
+    {center.x + costmap_parameters_->width_2(), center.y - costmap_parameters_->width_2()});
+  costmap_contour.push_back(
+    {center.x + costmap_parameters_->width_2(), center.y + costmap_parameters_->width_2()});
+  costmap_contour.push_back(
+    {center.x - costmap_parameters_->width_2(), center.y + costmap_parameters_->width_2()});
+  costmap_contour.push_back(
+    {center.x - costmap_parameters_->width_2(), center.y - costmap_parameters_->width_2()});
+  return costmap_contour;
 }
 
 void GlobalCostmapGenerator::map_callback(const HADMapBin::SharedPtr msg)
 {
-  RCLCPP_INFO(get_logger(), "Received map");
   map_ = std::make_shared<lanelet::LaneletMap>();
   lanelet::utils::conversion::fromBinMsg(*msg, map_);
+  const lanelet::ConstLanelets all_lanelets = lanelet::utils::query::laneletLayer(map_);
+  roads_ = lanelet::utils::query::roadLanelets(all_lanelets);
 }
 
 }  // namespace costmap_generator
