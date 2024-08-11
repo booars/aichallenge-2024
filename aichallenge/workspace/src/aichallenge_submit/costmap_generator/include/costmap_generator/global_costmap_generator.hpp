@@ -19,6 +19,7 @@
 #include <rclcpp/rclcpp.hpp>
 
 #include <autoware_auto_mapping_msgs/msg/had_map_bin.hpp>
+#include <nav_msgs/msg/occupancy_grid.hpp>
 
 namespace costmap_generator
 {
@@ -28,6 +29,8 @@ class GlobalCostmapGenerator : public rclcpp::Node
   using FunctionTimer = booars_utils::ros::FunctionTimer;
   using HADMapBin = autoware_auto_mapping_msgs::msg::HADMapBin;
   using HADMapBinSubscription = rclcpp::Subscription<HADMapBin>;
+  using OccupancyGrid = nav_msgs::msg::OccupancyGrid;
+  using OccupancyGridPublisher = rclcpp::Publisher<OccupancyGrid>;
 
 public:
   explicit GlobalCostmapGenerator(const rclcpp::NodeOptions & options);
@@ -38,8 +41,10 @@ private:
 
   FunctionTimer::SharedPtr update_timer_;
 
-  HADMapBinSubscription::SharedPtr had_map_bin_sub_;
+  HADMapBinSubscription::SharedPtr map_sub_;
   HADMapBin::SharedPtr map_;
+
+  OccupancyGridPublisher::SharedPtr costmap_pub_;
 };
 }  // namespace costmap_generator
 

@@ -11,6 +11,7 @@
 
   <depend>autoware_auto_mapping_msgs</depend>
   <deoend>booars_utils</depend>
+  <depend>nav_msgs</depend>
   <depend>rclcpp</depend>
   <depend>rclcpp_components</depend>
 

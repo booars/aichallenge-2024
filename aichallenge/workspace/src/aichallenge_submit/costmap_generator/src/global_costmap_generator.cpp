@@ -27,9 +27,14 @@ GlobalCostmapGenerator::GlobalCostmapGenerator(const rclcpp::NodeOptions & optio
 
   // Create subscriptions
   {
-    had_map_bin_sub_ = this->create_subscription<HADMapBin>(
+    map_sub_ = this->create_subscription<HADMapBin>(
       "~/input/map", 1,
       std::bind(&GlobalCostmapGenerator::map_callback, this, std::placeholders::_1));
+  }
+
+  // Create publishers
+  {
+    costmap_pub_ = this->create_publisher<OccupancyGrid>("~/output/costmap", 1);
   }
 
   // Create function timers
@@ -41,6 +46,7 @@ GlobalCostmapGenerator::GlobalCostmapGenerator(const rclcpp::NodeOptions & optio
 
 void GlobalCostmapGenerator::update()
 {
+  // Check if map is available
   if (!map_) {
     RCLCPP_WARN(get_logger(), "No map received yet");
     return;
