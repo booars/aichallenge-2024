@@ -1,6 +1,7 @@
 /**:
   ros__parameters:
     update_rate: 20.0 # Hz
-    costmap_center_frame_id: "base_link"
+    costmap_target_frame_id: "base_link"
+    costmap_frame_id: "costmap"
     costmap_width: 20.0 # m
     costmap_resolution: 0.2 # m/cell

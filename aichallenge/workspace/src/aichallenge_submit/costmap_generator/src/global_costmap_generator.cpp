@@ -24,13 +24,17 @@
 namespace costmap_generator
 {
 GlobalCostmapGenerator::GlobalCostmapGenerator(const rclcpp::NodeOptions & options)
-: Node("global_costmap_generator", options), tf_buffer_(get_clock()), tf_listener_(tf_buffer_)
+: Node("global_costmap_generator", options),
+  tf_buffer_(get_clock()),
+  tf_listener_(tf_buffer_),
+  tf_broadcaster_(this)
 {
   // Declare parameters
   double update_rate;
   {
     update_rate = this->declare_parameter("update_rate", 20.0);
-    costmap_center_frame_id_ = this->declare_parameter("costmap_center_frame_id", "base_link");
+    costmap_target_frame_id_ = this->declare_parameter("costmap_target_frame_id", "base_link");
+    costmap_frame_id_ = this->declare_parameter("costmap_frame_id", "costmap");
 
     double costmap_width = this->declare_parameter("costmap_width", 20.0);
     double costmap_resolution = this->declare_parameter("costmap_resolution", 0.1);
@@ -64,19 +68,18 @@ void GlobalCostmapGenerator::update()
     return;
   }
 
-  // Get the transform from the map frame to the costmap frame
-  Vector3 costmap_center_position;
-  {
-    geometry_msgs::msg::TransformStamped transform;
-    try {
-      transform = tf_buffer_.lookupTransform("map", costmap_center_frame_id_, tf2::TimePointZero);
-    } catch (tf2::TransformException & ex) {
-      RCLCPP_WARN_THROTTLE(
-        get_logger(), *get_clock(), 1000, "Could not get transform %s", ex.what());
-      return;
-    }
-    costmap_center_position = transform.transform.translation;
+  // Get the transform from the map frame to the costmap target frame
+  geometry_msgs::msg::TransformStamped target_transform;
+  try {
+    target_transform =
+      tf_buffer_.lookupTransform("map", costmap_target_frame_id_, tf2::TimePointZero);
+  } catch (tf2::TransformException & ex) {
+    RCLCPP_WARN_THROTTLE(get_logger(), *get_clock(), 1000, "Could not get transform %s", ex.what());
+    return;
   }
+
+  // Cache the current position of the costmap center
+  Vector3 costmap_center_position = target_transform.transform.translation;
 
   // Get the intersected lanelets
   lanelet::ConstLanelets intersected_lanelets = get_intersected_lanelets(costmap_center_position);
@@ -108,6 +111,14 @@ void GlobalCostmapGenerator::update()
         }
       }
     }
+  }
+
+  // Publish the costmap TF
+  {
+    geometry_msgs::msg::TransformStamped costmap_transform = target_transform;
+    costmap_transform.header.stamp = now();
+    costmap_transform.child_frame_id = costmap_frame_id_;
+    tf_broadcaster_.sendTransform(costmap_transform);
   }
 
   // Publish the costmap

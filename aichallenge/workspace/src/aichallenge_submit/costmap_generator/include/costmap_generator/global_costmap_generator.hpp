@@ -26,6 +26,7 @@
 
 #include <lanelet2_core/LaneletMap.h>
 #include <tf2_ros/buffer.h>
+#include <tf2_ros/transform_broadcaster.h>
 #include <tf2_ros/transform_listener.h>
 
 #include <string>
@@ -59,6 +60,7 @@ private:
 
   tf2_ros::Buffer tf_buffer_;
   tf2_ros::TransformListener tf_listener_;
+  tf2_ros::TransformBroadcaster tf_broadcaster_;
 
   HADMapBinSubscription::SharedPtr map_sub_;
   lanelet::LaneletMapPtr map_;
@@ -66,7 +68,8 @@ private:
 
   OccupancyGridPublisher::SharedPtr costmap_pub_;
 
-  std::string costmap_center_frame_id_;
+  std::string costmap_target_frame_id_;
+  std::string costmap_frame_id_;
   CostmapParameters::SharedPtr costmap_parameters_;
 };
 }  // namespace costmap_generator
