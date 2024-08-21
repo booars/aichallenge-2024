@@ -1,6 +1,10 @@
 <launch>
   <group>
+    <arg name="global_costmap_generator_config_file" default="$(find-pkg-share costmap_generator)/config/costmap_generator/global_costmap_generator.param.yaml"/>
+
     <push-ros-namespace namespace="costmap_generator"/>
-    <include file="$(find-pkg-share costmap_generator)/launch/costmap_generator/global_costmap_generator.launch.xml"/>
+    <include file="$(find-pkg-share costmap_generator)/launch/costmap_generator/global_costmap_generator.launch.xml">
+      <arg name="config_file" value="$(var global_costmap_generator_config_file)"/>
+    </include>
   </group>
 </launch>
