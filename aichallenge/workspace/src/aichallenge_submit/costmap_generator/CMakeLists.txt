@@ -10,11 +10,11 @@ find_package(ament_cmake_auto REQUIRED)
 
 ament_auto_find_build_dependencies()
 
-ament_auto_add_library(costmap_generator SHARED
+ament_auto_add_library(global_costmap_generator SHARED
   src/global_costmap_generator.cpp
 )
 
-rclcpp_components_register_node(costmap_generator
+rclcpp_components_register_node(global_costmap_generator
   PLUGIN "costmap_generator::GlobalCostmapGenerator"
   EXECUTABLE global_costmap_generator_node
 )

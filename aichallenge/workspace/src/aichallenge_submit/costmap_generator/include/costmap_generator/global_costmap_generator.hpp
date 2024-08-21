@@ -26,7 +26,6 @@
 
 #include <lanelet2_core/LaneletMap.h>
 #include <tf2_ros/buffer.h>
-#include <tf2_ros/transform_broadcaster.h>
 #include <tf2_ros/transform_listener.h>
 
 #include <string>
@@ -41,19 +40,19 @@ class GlobalCostmapGenerator : public rclcpp::Node
   using HADMapBinSubscription = rclcpp::Subscription<HADMapBin>;
   using LinearRing2d = tier4_autoware_utils::LinearRing2d;
   using OccupancyGrid = nav_msgs::msg::OccupancyGrid;
+  using OccupancyGridParameters = booars_utils::nav::OccupancyGridParameters;
   using OccupancyGridPublisher = rclcpp::Publisher<OccupancyGrid>;
   using Point2d = tier4_autoware_utils::Point2d;
   using Vector3 = geometry_msgs::msg::Vector3;
-  using CostmapParameters = booars_utils::nav::OccupancyGridParameters;
 
 public:
   explicit GlobalCostmapGenerator(const rclcpp::NodeOptions & options);
 
 private:
   void update();
-  lanelet::ConstLanelets get_intersected_lanelets(const Vector3 & center);
-  LinearRing2d get_costmap_contour(const Vector3 & center);
-  Point2d get_cell_position(const Vector3 & costmap_origin, const int & index);
+  lanelet::ConstLanelets get_intersected_lanelets(const Vector3 & costmap_center);
+  LinearRing2d get_costmap_contour(const Vector3 & costmap_center);
+  Point2d get_global_cell_position(const Vector3 & costmap_center, const int & index);
 
   void map_callback(const HADMapBin::SharedPtr msg);
 
@@ -61,17 +60,17 @@ private:
 
   tf2_ros::Buffer tf_buffer_;
   tf2_ros::TransformListener tf_listener_;
-  tf2_ros::TransformBroadcaster tf_broadcaster_;
 
   HADMapBinSubscription::SharedPtr map_sub_;
   lanelet::LaneletMapPtr map_;
   lanelet::ConstLanelets roads_;
 
   OccupancyGridPublisher::SharedPtr costmap_pub_;
+  OccupancyGrid::SharedPtr costmap_;
+  OccupancyGridParameters::SharedPtr costmap_parameters_;
 
-  std::string costmap_target_frame_id_;
-  std::string costmap_frame_id_;
-  CostmapParameters::SharedPtr costmap_parameters_;
+  std::string map_frame_;
+  std::string target_frame_;
 };
 }  // namespace costmap_generator
 
