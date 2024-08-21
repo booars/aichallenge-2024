@@ -15,7 +15,7 @@
 #ifndef COSTMAP_GENERATOR__GLOBAL_COSTMAP_GENERATOR_HPP_
 #define COSTMAP_GENERATOR__GLOBAL_COSTMAP_GENERATOR_HPP_
 
-#include "costmap_generator/costmap_parameters.hpp"
+#include "booars_utils/nav/occupancy_grid_parameters.hpp"
 
 #include <booars_utils/ros/function_timer.hpp>
 #include <rclcpp/rclcpp.hpp>
@@ -44,6 +44,7 @@ class GlobalCostmapGenerator : public rclcpp::Node
   using OccupancyGridPublisher = rclcpp::Publisher<OccupancyGrid>;
   using Point2d = tier4_autoware_utils::Point2d;
   using Vector3 = geometry_msgs::msg::Vector3;
+  using CostmapParameters = booars_utils::nav::OccupancyGridParameters;
 
 public:
   explicit GlobalCostmapGenerator(const rclcpp::NodeOptions & options);
