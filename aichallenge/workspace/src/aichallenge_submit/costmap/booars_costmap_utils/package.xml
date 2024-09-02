@@ -9,6 +9,7 @@
 
   <buildtool_depend>ament_cmake_auto</buildtool_depend>
 
+  <depend>cached_lanelet_costmap</depend>
   <depend>lanelet_costmap</depend>
   <depend>multi_layered_costmap</depend>
   <depend>predicted_object_costmap</depend>
