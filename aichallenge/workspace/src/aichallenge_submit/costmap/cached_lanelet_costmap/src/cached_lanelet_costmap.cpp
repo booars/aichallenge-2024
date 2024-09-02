@@ -27,38 +27,77 @@
 
 namespace cached_lanelet_costmap
 {
-LaneletCostmap::LaneletCostmap(rclcpp::Node & node, const std::string & layer_namespace)
+CachedLaneletCostmap::CachedLaneletCostmap(rclcpp::Node & node, const std::string & layer_namespace)
 : tf_buffer_(node.get_clock()), tf_listener_(tf_buffer_)
 {
   std::string map_topic = node.declare_parameter(layer_namespace + ".map_topic", "~/input/map");
   map_sub_ = node.create_subscription<HADMapBin>(
     map_topic, rclcpp::QoS(rclcpp::KeepLast(1)).reliable().transient_local(),
-    std::bind(&LaneletCostmap::map_callback, this, std::placeholders::_1));
+    std::bind(&CachedLaneletCostmap::map_callback, this, std::placeholders::_1));
+
+  std::string costmap_topic =
+    node.declare_parameter(layer_namespace + ".costmap_topic", "~/output/costmap");
+  costmap_pub_ = node.create_publisher<OccupancyGrid>(
+    costmap_topic, rclcpp::QoS(rclcpp::KeepLast(1)).reliable().transient_local());
+
+  {
+    double cached_costmap_min_x =
+      node.declare_parameter(layer_namespace + ".cached_costmap.min_x", 0.0);
+    double cached_costmap_min_y =
+      node.declare_parameter(layer_namespace + ".cached_costmap.min_y", 0.0);
+    double cached_costmap_max_x =
+      node.declare_parameter(layer_namespace + ".cached_costmap.max_x", 0.0);
+    double cached_costmap_max_y =
+      node.declare_parameter(layer_namespace + ".cached_costmap.max_y", 0.0);
+    double cached_costmap_resolution =
+      node.declare_parameter(layer_namespace + ".cached_costmap.resolution", 0.0);
+
+    cached_costmap_parameters_ = OccupancyGridParameters::create_parameters(
+      cached_costmap_max_x - cached_costmap_min_x, cached_costmap_max_y - cached_costmap_min_y,
+      cached_costmap_resolution);
+    cached_costmap_origin_x_ = (cached_costmap_min_x + cached_costmap_max_x) * 0.5;
+    cached_costmap_origin_y_ = (cached_costmap_min_y + cached_costmap_max_y) * 0.5;
+
+    cached_costmap_ =
+      booars_utils::nav::occupancy_grid_utils::create_occupancy_grid(cached_costmap_parameters_);
+
+    geometry_msgs::msg::Vector3 origin;
+    origin.x = cached_costmap_origin_x_;
+    origin.y = cached_costmap_origin_y_;
+    origin.z = 0.0;
+    booars_utils::nav::occupancy_grid_utils::update_origin(
+      cached_costmap_, cached_costmap_parameters_, origin);
+  }
 }
 
-bool LaneletCostmap::is_ready()
+bool CachedLaneletCostmap::is_ready()
 {
-  return map_ != nullptr;
+  return is_map_ready_;
 }
 
-bool LaneletCostmap::is_occupied(const geometry_msgs::msg::PointStamped & point)
+bool CachedLaneletCostmap::is_occupied(const geometry_msgs::msg::PointStamped & point)
 {
   if (!is_ready()) return true;
 
   geometry_msgs::msg::Point transformed_point;
-  if (!try_transform_point(point, transformed_point, map_frame_id_)) {
+  if (!try_transform_point(point, transformed_point, cached_costmap_->header.frame_id)) return true;
+
+  tier4_autoware_utils::Point2d point2d(
+    transformed_point.x - cached_costmap_origin_x_, transformed_point.y - cached_costmap_origin_y_);
+  if (
+    point2d[0] < -cached_costmap_parameters_->width_2() ||
+    point2d[0] > cached_costmap_parameters_->width_2() ||
+    point2d[1] < -cached_costmap_parameters_->height_2() ||
+    point2d[1] > cached_costmap_parameters_->height_2()) {
     return true;
   }
-
-  tier4_autoware_utils::Point2d point2d(transformed_point.x, transformed_point.y);
-  for (const auto & road : roads_) {
-    if (!lanelet::geometry::within(point2d, road.polygon2d().basicPolygon())) continue;
-    return false;
-  }
-  return true;
+  int index =
+    booars_utils::nav::occupancy_grid_utils::point_to_index(cached_costmap_parameters_, point2d);
+  if (index < 0 || index >= cached_costmap_parameters_->grid_num()) return true;
+  return cached_costmap_->data[index] > 0;
 }
 
-bool LaneletCostmap::try_transform_point(
+bool CachedLaneletCostmap::try_transform_point(
   const geometry_msgs::msg::PointStamped & point, geometry_msgs::msg::Point & transformed_point,
   const std::string & target_frame)
 {
@@ -73,12 +112,33 @@ bool LaneletCostmap::try_transform_point(
   return true;
 }
 
-void LaneletCostmap::map_callback(const HADMapBin::SharedPtr msg)
+void CachedLaneletCostmap::create_cached_costmap(
+  const std::string & map_frame_id, const lanelet::ConstLanelets & roads_lanelets)
 {
-  map_frame_id_ = msg->header.frame_id;
-  map_ = std::make_shared<lanelet::LaneletMap>();
-  lanelet::utils::conversion::fromBinMsg(*msg, map_);
-  const lanelet::ConstLanelets all_lanelets = lanelet::utils::query::laneletLayer(map_);
-  roads_ = lanelet::utils::query::roadLanelets(all_lanelets);
+  cached_costmap_->header.frame_id = map_frame_id;
+  for (int i = 0; i < cached_costmap_parameters_->grid_num(); i++) {
+    tier4_autoware_utils::Point2d point2d =
+      booars_utils::nav::occupancy_grid_utils::index_to_point(cached_costmap_parameters_, i);
+    point2d[0] += cached_costmap_origin_x_;
+    point2d[1] += cached_costmap_origin_y_;
+    cached_costmap_->data[i] = 100;
+    for (const auto & road_lanelet : roads_lanelets) {
+      if (!lanelet::geometry::within(point2d, road_lanelet.polygon2d().basicPolygon())) continue;
+      cached_costmap_->data[i] = 0;
+      break;
+    }
+  }
+  costmap_pub_->publish(*cached_costmap_);
+
+  is_map_ready_ = true;
+}
+
+void CachedLaneletCostmap::map_callback(const HADMapBin::SharedPtr msg)
+{
+  lanelet::LaneletMapPtr map = std::make_shared<lanelet::LaneletMap>();
+  lanelet::utils::conversion::fromBinMsg(*msg, map);
+  const lanelet::ConstLanelets all_lanelets = lanelet::utils::query::laneletLayer(map);
+  const lanelet::ConstLanelets roads_lanelets = lanelet::utils::query::roadLanelets(all_lanelets);
+  create_cached_costmap(msg->header.frame_id, roads_lanelets);
 }
 }  // namespace cached_lanelet_costmap

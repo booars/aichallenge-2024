@@ -15,6 +15,8 @@
 #ifndef CACHED_LANELET_COSTMAP__CACHED_LANELET_COSTMAP_HPP_
 #define CACHED_LANELET_COSTMAP__CACHED_LANELET_COSTMAP_HPP_
 
+#include <booars_utils/nav/occupancy_grid_parameters.hpp>
+#include <booars_utils/nav/occupancy_grid_utils.hpp>
 #include <multi_layered_costmap/costmap_base.hpp>
 
 #include <autoware_auto_mapping_msgs/msg/had_map_bin.hpp>
@@ -28,18 +30,20 @@
 namespace cached_lanelet_costmap
 {
 
+using OccupancyGrid = nav_msgs::msg::OccupancyGrid;
+using OccupancyGridParameters = booars_utils::nav::OccupancyGridParameters;
 using HADMapBin = autoware_auto_mapping_msgs::msg::HADMapBin;
 
-class LaneletCostmap : public multi_layered_costmap::CostmapBase
+class CachedLaneletCostmap : public multi_layered_costmap::CostmapBase
 {
 public:
-  using SharedPtr = std::shared_ptr<LaneletCostmap>;
-  explicit LaneletCostmap(rclcpp::Node & node, const std::string & layer_namespace);
+  using SharedPtr = std::shared_ptr<CachedLaneletCostmap>;
+  explicit CachedLaneletCostmap(rclcpp::Node & node, const std::string & layer_namespace);
 
   static CostmapBase::SharedPtr create_costmap(
     rclcpp::Node & node, const std::string & layer_namespace)
   {
-    return std::make_shared<LaneletCostmap>(node, layer_namespace);
+    return std::make_shared<CachedLaneletCostmap>(node, layer_namespace);
   }
 
   bool is_ready() override;
@@ -49,16 +53,22 @@ private:
   bool try_transform_point(
     const geometry_msgs::msg::PointStamped & point, geometry_msgs::msg::Point & transformed_point,
     const std::string & target_frame);
+  void create_cached_costmap(
+    const std::string & map_frame_id, const lanelet::ConstLanelets & roads_lanelets);
   void map_callback(const HADMapBin::SharedPtr msg);
 
   tf2_ros::Buffer tf_buffer_;
   tf2_ros::TransformListener tf_listener_;
 
   rclcpp::Subscription<HADMapBin>::SharedPtr map_sub_;
+  rclcpp::Publisher<OccupancyGrid>::SharedPtr costmap_pub_;
 
-  std::string map_frame_id_;
-  lanelet::LaneletMapPtr map_;
-  lanelet::ConstLanelets roads_;
+  OccupancyGrid::SharedPtr cached_costmap_;
+  OccupancyGridParameters::SharedPtr cached_costmap_parameters_;
+
+  double cached_costmap_origin_x_;
+  double cached_costmap_origin_y_;
+  bool is_map_ready_ = false;
 };
 }  // namespace cached_lanelet_costmap
 
