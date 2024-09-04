@@ -189,8 +189,8 @@ namespace stanley_control{
 }  // namespace stanley_control
 
 int main(int argc, char const * argv[]){
-  rclcpp::init(argc, argv);
-  rclcpp::spin(std::make_shared<stanley_control::StanleyControl>());
-  rclcpp::shutdown();
-  return 0;
+    rclcpp::init(argc, argv);
+    rclcpp::spin(std::make_shared<stanley_control::StanleyControl>());
+    rclcpp::shutdown();
+    return 0;
 }
