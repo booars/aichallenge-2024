@@ -25,5 +25,9 @@
       <remap from="input/trajectory" to="/planning/scenario_planning/trajectory"/>
       <remap from="output/control_cmd" to="/control/command/control_cmd"/>
     </node> -->
+    <!-- speed_proportional_gain: P gain for speed control -->
+    <!-- external_target_vel: Target speed -->
+    <!-- k_gain: Gain to determine additional steering based on speed -->
+    <!-- k_gain_slow: Constant to prevent zero division -->
   </group>
 </launch>
