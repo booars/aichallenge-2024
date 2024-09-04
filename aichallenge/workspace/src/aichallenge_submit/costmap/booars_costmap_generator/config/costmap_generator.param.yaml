@@ -1,6 +1,6 @@
 /**:
   ros__parameters:
-    update_rate: 20.0
+    update_rate: 1.0
     map_frame_id: "map"
     costmap_center_frame_id: "base_link"
     costmap_width: 50.0
@@ -8,7 +8,7 @@
     multi_layered_costmap:
       layers:
         - "cached_lanelet_layer"
-        # - "lanelet_layer"
+        - "lanelet_layer"
         - "predicted_object_layer"
       cached_lanelet_layer:
         type: "cached_lanelet"
@@ -20,9 +20,9 @@
           min_y: 43114.0
           max_y: 43194.0
           resolution: 0.1
-      # lanelet_layer:
-      #   type: "lanelet"
-      #   map_topic: "/map/vector_map"
+      lanelet_layer:
+        type: "lanelet"
+        map_topic: "/map/vector_map"
       predicted_object_layer:
         type: "predicted_object"
         predicted_objects_topic: "/perception/object_recognition/objects"
