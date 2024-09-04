@@ -25,8 +25,8 @@ namespace stanley_control{
     using motion_utils::findNearestIndex;
 
     StanleyControl::StanleyControl(): Node("stanley_control"), tf_buffer(this->get_clock()), tf_listener(tf_buffer),
-    speed_proportional_gain_(declare_parameter<float>("speed_proportional_gain_", 2.14)),
-    external_target_vel_(declare_parameter<float>("external_target_vel_", 10.0)),
+    speed_proportional_gain_(declare_parameter<float>("speed_proportional_gain", 2.14)),
+    external_target_vel_(declare_parameter<float>("external_target_vel", 10.0)),
     k_gain(declare_parameter<float>("k_gain", 2.0)),
     k_gain_slow(declare_parameter<float>("k_gain_slow", 1.0)){
         pub_cmd_ = create_publisher<AckermannControlCommand>("output/control_cmd", 1.0);
