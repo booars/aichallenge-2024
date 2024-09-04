@@ -128,12 +128,12 @@ namespace stanley_control{
 
                 // calculate the cosine of two vectors, from the inner product
                 // use outer product to calculate signed angle (if v1xv2 >=0, then v2 is "to the left" of v1 )
-                double ip_vecs = x_track*vector_vehicle.vector.x + y_track*vector_vehicle.vector.y;
-                double cos_vecs = ip_vecs / (norm_track * norm_vehicle);
-                double angle = acos(cos_vecs);
+                double ip_vector = x_track*vector_vehicle.vector.x + y_track*vector_vehicle.vector.y;
+                double cos_vector = ip_vector / (norm_track * norm_vehicle);
+                double angle = acos(cos_vector);
 
-                double xp_vecs = x_track*vector_vehicle.vector.y - y_track*vector_vehicle.vector.x;
-                if(xp_vecs>=0) angle*=-1; 
+                double xp_vector = x_track*vector_vehicle.vector.y - y_track*vector_vehicle.vector.x;
+                if(xp_vector>=0) angle*=-1; 
 
                 // calculate positional error from nearest trajectory point
 
