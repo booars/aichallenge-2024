@@ -1,17 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <launch>
   <!-- Parameters -->
-  <arg name="use_stanley" default="false" />
+  <arg name="use_stanley" default="true" />
 
   <group>
     <push-ros-namespace namespace="control" />
 
     <node pkg="simple_pure_pursuit" exec="simple_pure_pursuit" name="simple_pure_pursuit_node"
       output="screen" unless="$(var use_stanley)">
+      <param name="wheel_base" value="2.14" />
       <param name="use_external_target_vel" value="true" />
       <param name="external_target_vel" value="8.0" />
-      <param name="lookahead_gain" value="0.24" />
-      <param name="lookahead_min_distance" value="3.0" />
+      <param name="lookahead_gain" value="0.12" />
+      <param name="lookahead_min_distance" value="1.5" />
       <param name="speed_proportional_gain" value="1.0" />
 
       <remap from="input/kinematics" to="/localization/kinematic_state" />
@@ -35,5 +36,18 @@
     <!-- external_target_vel: Target speed -->
     <!-- k_gain: Gain to determine additional steering based on speed -->
     <!-- k_gain_slow: Constant to prevent zero division -->
+
+    <node pkg="simple_pd_speed_control" exec="simple_pd_speed_control_node" name="simple_pd_speed_control" output="screen">
+      <param name="speed_proportional_gain" value="1.0" />
+      <remap from="input/kinematics" to="/localization/kinematic_state" />
+      <remap from="input/trajectory" to="/planning/output/mppi_planned_path" />
+    </node>
+    <node pkg="lateral_pure_pursuit" exec="lateral_pure_pursuit_node" name="lateral_pure_pursuit" output="screen">
+      <param name="wheel_base" value="2.14" />
+      <param name="lookahead_gain" value="0.12" />
+      <param name="lookahead_min_distance" value="1.5" />
+      <remap from="input/kinematics" to="/localization/kinematic_state" />
+      <remap from="input/trajectory" to="/planning/output/mppi_planned_path" />
+    </node>
   </group>
 </launch>
