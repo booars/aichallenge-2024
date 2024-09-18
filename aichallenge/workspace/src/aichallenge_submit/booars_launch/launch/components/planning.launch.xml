@@ -104,7 +104,7 @@
         <param name="stop_offset" value="3.0"/>
         <!-- 最高速度 -->
         <param name="max_speed" value="30.0"/>
-        <!-- trajecotryの点の間隔 -->
+        <!-- trajectoryの点の間隔 -->
         <param name="traj_width" value="1.0"/>
       </node>
 
