@@ -27,4 +27,4 @@
     goal_range: 10.0
 
     enable_pit: false
-    pit_in_threshold: 10
+    pit_in_threshold: 20
