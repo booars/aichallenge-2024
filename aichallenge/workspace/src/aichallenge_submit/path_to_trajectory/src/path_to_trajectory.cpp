@@ -51,8 +51,11 @@ void PathToTrajectory::callback(const PathWithLaneId::SharedPtr msg) {
     const double t= traj_width_/v;
     v+=dec_mpss*t;
     v=std::max(0.0,v);
-    trajectory.points.at(trajectory.points.size()-offset_index+i).longitudinal_velocity_mps
-      =std::min(float(v), trajectory.points.at(trajectory.points.size()-offset_index+i).longitudinal_velocity_mps);
+    int index = trajectory.points.size() - offset_index + i;
+    if (index >= 0 && index < trajectory.points.size()) {
+        trajectory.points.at(index).longitudinal_velocity_mps
+            = std::min(float(v), trajectory.points.at(index).longitudinal_velocity_mps);
+    }
   }
   pub_->publish(trajectory);
 }

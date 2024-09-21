@@ -98,7 +98,7 @@
         <remap from="input" to="/planning/scenario_planning/lane_driving/behavior_planning/path_with_lane_id"/>
         <remap from="output" to="/planning/scenario_planning/trajectory"/>
         <!-- 減速度 -->
-        <param name="deceleration" value="-10.0"/>
+        <param name="deceleration" value="-14.0"/>
         <!-- ピットの何メートル前で速度を0にするか -->
         <param name="stop_offset" value="3.0"/>
         <!-- 最高速度 -->
