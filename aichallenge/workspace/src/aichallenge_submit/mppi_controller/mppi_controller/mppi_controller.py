@@ -44,6 +44,7 @@ class mppi_controller:
         self.delta_t = torch.tensor(self.config["delta_t"], device=self._device, dtype=self._dtype)
         self.vehicle_L = torch.tensor(self.config["vehicle_L"], device=self._device, dtype=self._dtype)
         self.V_MAX = torch.tensor(self.config["V_MAX"], device=self._device, dtype=self._dtype)
+        self.footprint = torch.tensor(self.config["footprint"], device=self._device, dtype=self._dtype)
         
         # cost weights
         self.Qc = self.config["Qc"]  # contouring error cost
@@ -162,7 +163,12 @@ class mppi_controller:
         velocity_cost = self.Qv * (v - v_target).pow(2)
 
         # compute obstacle cost from cost map
-        pos_batch = state[:, :2].unsqueeze(1)  # (batch_size, 1, 2)
+        # revolve the footprint by the yaw angle
+        # angle = state[:, 2]
+        # footprint = torch.matmul(self.footprint, torch.tensor([[torch.cos(angle), -torch.sin(angle)], [torch.sin(angle), torch.cos(angle)]]).to(self._device, self._dtype))
+        # pos = state[:, :2] + footprint
+        # pos_batch = pos.unsqueeze(1)  # (batch_size, 1, 2)
+        pos_batch = state[:, :2].unsqueeze(1)
         obstacle_cost = self.cost_map.compute_cost(pos_batch).squeeze(1)  # (batch_size,)
         obstacle_cost = self.Qo * obstacle_cost
 

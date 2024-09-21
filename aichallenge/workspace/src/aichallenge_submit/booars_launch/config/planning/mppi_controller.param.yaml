@@ -21,6 +21,7 @@
       Qdin : 0.5
       # model param
       delta_t : 0.1
-      vehicle_L : 1.0
+      vehicle_L : 1.08
       V_MAX : 8.0
+      footprint : "[[1.554, 0.725], [1.554, -0.725], [-0.51, -0.725], [-0.51, 0.725]]"
 

@@ -8,8 +8,6 @@ Panels:
         - /Planning1/ScenarioPlanning1/ScenarioTrajectory1
         - /Planning1/ScenarioPlanning1/ScenarioTrajectory1/View Path1
         - /Planning1/Costmap1/Map1
-        - /Planning1/MPPI1/Trajectory1
-        - /Planning1/MPPI1/ReferenceTrajectory1
         - /Planning1/MPPI1/ReferenceTrajectory1/View Path1
       Splitter Ratio: 0.557669460773468
     Tree Height: 158
@@ -2051,6 +2049,19 @@ Visualization Manager:
                 Constant Color: false
                 Scale: 0.30000001192092896
                 Value: true
+            - Alpha: 1
+              Class: rviz_default_plugins/Polygon
+              Color: 255; 255; 255
+              Enabled: true
+              Name: footprint
+              Topic:
+                Depth: 5
+                Durability Policy: Volatile
+                Filter size: 10
+                History Policy: Keep Last
+                Reliability Policy: Reliable
+                Value: /planning/debug/footprints
+              Value: true
           Enabled: true
           Name: MPPI
       Enabled: true
@@ -2251,7 +2262,7 @@ Visualization Manager:
   Value: true
   Views:
     Current:
-      Angle: 0
+      Angle: 0.14999985694885254
       Class: rviz_default_plugins/TopDownOrtho
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
@@ -2261,11 +2272,11 @@ Visualization Manager:
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Scale: 9.442424774169922
+      Scale: 107.53335571289062
       Target Frame: viewer
       Value: TopDownOrtho (rviz_default_plugins)
-      X: 2.5461606979370117
-      Y: -8.487200736999512
+      X: 0.3645123243331909
+      Y: -25.187820434570312
     Saved:
       - Class: rviz_default_plugins/ThirdPersonFollower
         Distance: 18

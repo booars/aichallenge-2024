@@ -5,10 +5,13 @@ from geometry_msgs.msg import Pose, Point, Quaternion
 from autoware_auto_planning_msgs.msg import Trajectory, TrajectoryPoint
 from autoware_auto_control_msgs.msg import AckermannControlCommand
 from nav_msgs.msg import OccupancyGrid
+# for footprints
+from geometry_msgs.msg import PolygonStamped, Point32
 from rclpy.qos import QoSProfile
 import math
 import torch
 import numpy as np
+import ast
 import tf_transformations
 from mppi_controller.mppi_controller import mppi_controller
 from mppi_controller.cost_map_tensor import CostMapTensor
@@ -39,8 +42,9 @@ class MppiControllerNode(Node):
         self.declare_parameter('delta_t', 0.1)
         self.declare_parameter('vehicle_L', 1.0)
         self.declare_parameter('V_MAX', 8.0)
+        self.declare_parameter('footprint', "[[0.0, 0.0], [0.0, 0.0], [0.0, 0.0], [0.0, 0.0]]")
         # get
-        config = {
+        self.config = {
             "horizon": self.get_parameter('horizon').get_parameter_value().integer_value,
             "num_samples": self.get_parameter('num_samples').get_parameter_value().integer_value,
             "u_min": self.get_parameter('u_min').get_parameter_value().double_array_value,
@@ -60,9 +64,10 @@ class MppiControllerNode(Node):
             "delta_t": self.get_parameter('delta_t').get_parameter_value().double_value,
             "vehicle_L": self.get_parameter('vehicle_L').get_parameter_value().double_value,
             "V_MAX": self.get_parameter('V_MAX').get_parameter_value().double_value,
+            "footprint": ast.literal_eval(self.get_parameter('footprint').get_parameter_value().string_value),
         }
 
-        self.get_logger().info(f'config: {config}')
+        self.get_logger().info(f'config: {self.config}')
 
         # publisher
         # control command
@@ -71,6 +76,8 @@ class MppiControllerNode(Node):
         self.pub_planned_path = self.create_publisher(Trajectory, 'output/planned_path', 1)
         # debug path
         self.pub_debug_path = self.create_publisher(Trajectory, 'debug/path', 1)
+        # footprints
+        self.pub_footprints = self.create_publisher(PolygonStamped, 'debug/footprints', 1)
 
         # subscriber
         # state
@@ -100,7 +107,7 @@ class MppiControllerNode(Node):
         self.dtype = torch.float32
         
         # mppi controller
-        self.controller = mppi_controller(config=config, debug=True, device=self.device, dtype=self.dtype)
+        self.controller = mppi_controller(config=self.config, debug=True, device=self.device, dtype=self.dtype)
 
         self.odometry: Odometry = None
         self.trajectory: Trajectory = None
@@ -226,6 +233,15 @@ class MppiControllerNode(Node):
             ) 
         for point in self.controller.reference_path.cpu().numpy()]
         self.pub_debug_path.publish(debug_path)
+
+        # publish footprints
+        footprints = PolygonStamped()
+        footprints.header.stamp = self.get_clock().now().to_msg()
+        footprints.header.frame_id = 'base_link'
+        footprints.polygon.points = [
+            Point32(x=point[0], y=point[1]) for point in self.config['footprint']
+        ]
+        self.pub_footprints.publish(footprints)
 
 
     def subscribe_message_available(self):
