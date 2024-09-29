@@ -18,7 +18,7 @@
       Qv : 4.0
       Qo : 1000.0
       Qin : 0.01
-      Qdin : 0.5
+      Qdin : 0.0
       # model param
       delta_t : 0.1
       vehicle_L : 1.08
