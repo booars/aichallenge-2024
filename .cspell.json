@@ -46,10 +46,14 @@
       "ignoreRegExpList": ["@author .*$", "[\\@]tparam", "\\author .*$", "Author(s)?( )?: .*$", "TODO\\((.*?)\\)"]
     }
   ],
+  "flagWords": [
+    "gird"
+  ],
   "words": [
     "ackermann",
     "adapi",
     "aichallenge",
+    "astar",
     "autocompute",
     "automotiveaichallenge",
     "autoware",
@@ -76,6 +80,8 @@
     "libgazebo",
     "libgl",
     "linalg",
+    "linestring",
+    "linestrings",
     "lowpass",
     "mapfile",
     "mathcal",
@@ -91,6 +97,7 @@
     "rois",
     "rosdep",
     "rosdistro",
+    "rrtstar",
     "rviz",
     "schematypens",
     "sideshift",
