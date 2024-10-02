@@ -91,6 +91,7 @@
     "osrf",
     "pitstop",
     "pointcloud",
+    "posmode",
     "rclcpp",
     "rclpy",
     "rcutils",
