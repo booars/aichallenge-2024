@@ -34,7 +34,6 @@ private:
         msg->pose.covariance[7*3] = 100000.0;
         msg->pose.covariance[7*4] = 100000.0;
         msg->pose.covariance[7*5] = 100000.0;
-
         // insert imu if orientation is nan or empty
         if (std::isnan(msg->pose.pose.orientation.x) ||
             std::isnan(msg->pose.pose.orientation.y) ||
