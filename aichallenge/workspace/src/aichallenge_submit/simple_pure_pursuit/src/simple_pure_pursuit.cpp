@@ -39,7 +39,8 @@ SimplePurePursuit::SimplePurePursuit()
     rclcpp::create_timer(this, get_clock(), 30ms, std::bind(&SimplePurePursuit::onTimer, this));
 
   // dynamic reconfigure
-  auto parameter_change_cb = std::bind(&SimplePurePursuit::parameter_callback, this, std::placeholders::_1);
+  auto parameter_change_cb =
+    std::bind(&SimplePurePursuit::parameter_callback, this, std::placeholders::_1);
   reset_param_handler_ = SimplePurePursuit::add_on_set_parameters_callback(parameter_change_cb);
 }
 
@@ -136,10 +137,11 @@ void SimplePurePursuit::onTimer()
     double alpha = std::atan2(lookahead_point_y - rear_y, lookahead_point_x - rear_x) -
                    tf2::getYaw(odometry_->pose.pose.orientation);
     cmd.lateral.steering_tire_angle =
-      steering_tire_angle_gain_ * std::atan2(2.0 * wheel_base_ * std::sin(alpha), lookahead_distance);
+      steering_tire_angle_gain_ *
+      std::atan2(2.0 * wheel_base_ * std::sin(alpha), lookahead_distance);
   }
   pub_cmd_->publish(cmd);
-  cmd.lateral.steering_tire_angle /=  steering_tire_angle_gain_;
+  cmd.lateral.steering_tire_angle /= steering_tire_angle_gain_;
   pub_raw_cmd_->publish(cmd);
 }
 
@@ -155,27 +157,30 @@ bool SimplePurePursuit::subscribeMessageAvailable()
   }
   return true;
 }
-rcl_interfaces::msg::SetParametersResult SimplePurePursuit::parameter_callback(const std::vector<rclcpp::Parameter> &parameters){
+rcl_interfaces::msg::SetParametersResult SimplePurePursuit::parameter_callback(
+  const std::vector<rclcpp::Parameter> & parameters)
+{
   auto result = rcl_interfaces::msg::SetParametersResult();
   result.successful = true;
 
-  for (const auto &parameter : parameters) {
+  for (const auto & parameter : parameters) {
     if (parameter.get_name() == "lookahead_gain") {
       lookahead_gain_ = parameter.as_double();
       RCLCPP_INFO(SimplePurePursuit::get_logger(), "lookahead_gain changed to %f", lookahead_gain_);
     } else if (parameter.get_name() == "lookahead_min_distance") {
       lookahead_min_distance_ = parameter.as_double();
-      RCLCPP_INFO(SimplePurePursuit::get_logger(), "lookahead_min_distance changed to %f", lookahead_min_distance_);
+      RCLCPP_INFO(
+        SimplePurePursuit::get_logger(), "lookahead_min_distance changed to %f",
+        lookahead_min_distance_);
     } else if (parameter.get_name() == "external_target_vel") {
       external_target_vel_ = parameter.as_double();
-      RCLCPP_INFO(SimplePurePursuit::get_logger(), "external_target_vel changed to %f", external_target_vel_);
-    } 
+      RCLCPP_INFO(
+        SimplePurePursuit::get_logger(), "external_target_vel changed to %f", external_target_vel_);
+    }
   }
   return result;
 }
 }  // namespace simple_pure_pursuit
-
-
 
 int main(int argc, char const * argv[])
 {
