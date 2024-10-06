@@ -3,7 +3,7 @@
 <package format="3">
   <name>ackermann_control_publisher</name>
   <version>0.0.1</version>
-  <description>Bundles indivisual lateral/longitudinal commands and publishes them as Ackermanncontrolcommand message</description>
+  <description>Bundles individual lateral/longitudinal commands and publishes them as `AckermannControlCommand` message</description>
   <maintainer email="sitahara@g.ecc.u-tokyo.ac.jp">Shotaro Itahara</maintainer>
   <license>Apache-2.0</license>
 

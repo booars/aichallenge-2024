@@ -3,7 +3,7 @@
 <package format="3">
   <name>lateral_stanley</name>
   <version>0.0.1</version>
-  <description>Stanley control, takes desired trajectory and odometory, returns steering angle only</description>
+  <description>Stanley control, takes desired trajectory and odometry, returns steering angle only</description>
   <maintainer email="sitahara@g.ecc.u-tokyo.ac.jp">Shotaro Itahara</maintainer>
   <license>Apache-2.0</license>
 
