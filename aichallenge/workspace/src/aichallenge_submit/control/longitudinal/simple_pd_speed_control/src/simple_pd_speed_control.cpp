@@ -45,7 +45,7 @@ namespace simple_speed_pd_control{
             return;
         }
 
-        size_t closet_traj_point_idx = findNearestIndex(trajectory_->points, odometry_->pose.pose.position);
+        // size_t closet_traj_point_idx = findNearestIndex(trajectory_->points, odometry_->pose.pose.position);
 
         // get closest trajectory point from current position
         // TrajectoryPoint closet_traj_point = trajectory_->points.at(closet_traj_point_idx);
