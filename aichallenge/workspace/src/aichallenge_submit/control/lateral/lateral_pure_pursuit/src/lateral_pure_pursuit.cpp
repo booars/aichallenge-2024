@@ -45,6 +45,10 @@ namespace lateral_pure_pursuit{
         // dynamic reconfigure
         auto parameter_change_cb = std::bind(&LateralPurePursuit::parameter_callback, this, std::placeholders::_1);
         reset_param_handler_ = LateralPurePursuit::add_on_set_parameters_callback(parameter_change_cb);
+
+        // steering gain
+        // todo: make this configurable from dynamic reconfigure
+        extra_steering_gain_ = 1.0;
     }
 
     void LateralPurePursuit::onTimer(){
@@ -119,7 +123,7 @@ namespace lateral_pure_pursuit{
             double alpha = std::atan2(lookahead_point_y - rear_y, lookahead_point_x - rear_x) -
                         tf2::getYaw(odometry_->pose.pose.orientation);
             cmd_msg.data =
-            std::atan2(2.0 * wheel_base_ * std::sin(alpha), lookahead_distance);
+            std::atan2(2.0 * wheel_base_ * std::sin(alpha), lookahead_distance) * extra_steering_gain_;
         }
         pub_cmd_->publish(cmd_msg);
     }

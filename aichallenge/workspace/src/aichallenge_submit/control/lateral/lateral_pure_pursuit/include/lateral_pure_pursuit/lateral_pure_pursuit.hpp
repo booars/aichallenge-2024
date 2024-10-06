@@ -70,6 +70,7 @@ namespace lateral_pure_pursuit{
             double wheel_base_;
             double lookahead_gain_;
             double lookahead_min_distance_;
+            double extra_steering_gain_;
 
             OnSetParametersCallbackHandle::SharedPtr reset_param_handler_;
             rcl_interfaces::msg::SetParametersResult parameter_callback(const std::vector<rclcpp::Parameter> &parameters);
