@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <launch>
   <!-- Parameters -->
-  <arg name="use_stanley" default="true" />
+  <arg name="simulation" default="false" />
+  <arg name="use_stanley" default="false" />
 
   <group>
     <push-ros-namespace namespace="control" />
