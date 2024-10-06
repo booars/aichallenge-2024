@@ -28,7 +28,8 @@ namespace lateral_pure_pursuit{
     // initialize parameters
     wheel_base_(declare_parameter<float>("wheel_base", 2.14)),
     lookahead_gain_(declare_parameter<float>("lookahead_gain", 1.0)),
-    lookahead_min_distance_(declare_parameter<float>("lookahead_min_distance", 1.0)){
+    lookahead_min_distance_(declare_parameter<float>("lookahead_min_distance", 1.0)),
+    extra_steering_gain_(declare_parameter<float>("steering_tire_angle_gain",1.0)){
 
         pub_cmd_ = create_publisher<Float64>("output/steer_angle", 1);
         pub_marker_ = create_publisher<Marker>("debug/pursuit_lookahead2", 1);
@@ -48,7 +49,6 @@ namespace lateral_pure_pursuit{
 
         // steering gain
         // todo: make this configurable from dynamic reconfigure
-        extra_steering_gain_ = 1.0;
     }
 
     void LateralPurePursuit::onTimer(){
@@ -145,11 +145,16 @@ namespace lateral_pure_pursuit{
 
         for (const auto &parameter : parameters) {
             if (parameter.get_name() == "lookahead_gain") {
-            lookahead_gain_ = parameter.as_double();
-            RCLCPP_INFO(LateralPurePursuit::get_logger(), "lookahead_gain changed to %f", lookahead_gain_);
-            } else if (parameter.get_name() == "lookahead_min_distance") {
-            lookahead_min_distance_ = parameter.as_double();
-            RCLCPP_INFO(LateralPurePursuit::get_logger(), "lookahead_min_distance changed to %f", lookahead_min_distance_);
+                lookahead_gain_ = parameter.as_double();
+                RCLCPP_INFO(LateralPurePursuit::get_logger(), "lookahead_gain changed to %f", lookahead_gain_);
+            } 
+            else if (parameter.get_name() == "lookahead_min_distance") {
+                lookahead_min_distance_ = parameter.as_double();
+                RCLCPP_INFO(LateralPurePursuit::get_logger(), "lookahead_min_distance changed to %f", lookahead_min_distance_);
+            } 
+            else if (parameter.get_name() == "steering_tire_angle_gain") {
+                extra_steering_gain_ = parameter.as_double();
+                RCLCPP_INFO(LateralPurePursuit::get_logger(), "steering_tire_angle_gain changed to %f", extra_steering_gain_);
             }
         }
         return result;

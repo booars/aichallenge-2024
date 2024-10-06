@@ -67,10 +67,10 @@ namespace lateral_pure_pursuit{
             bool subscribeMessageAvailable();
             
             //parameters
-            double wheel_base_;
-            double lookahead_gain_;
-            double lookahead_min_distance_;
-            double extra_steering_gain_;
+            double wheel_base_;              // Distance between front and rear axle, needed for geometric control
+            double lookahead_gain_;          // Determines how the lookahead distance grows in relationship with speed
+            double lookahead_min_distance_;  // Minimum lookahead distance, any lookahead distance will be built on top of this
+            double extra_steering_gain_;     // Duct tape fix constant to account for lack of steering motor power
 
             OnSetParametersCallbackHandle::SharedPtr reset_param_handler_;
             rcl_interfaces::msg::SetParametersResult parameter_callback(const std::vector<rclcpp::Parameter> &parameters);
