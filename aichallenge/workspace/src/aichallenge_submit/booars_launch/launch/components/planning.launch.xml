@@ -94,18 +94,16 @@
         </group> <!-- behavior_planning -->
       </group> <!-- lane_driving -->
 
-      <!-- Customizable -->
-      <node pkg="path_to_trajectory" exec="path_to_trajectory_node" name="path_to_trajectory" output="screen">
-        <remap from="input" to="/planning/scenario_planning/lane_driving/behavior_planning/path_with_lane_id"/>
+      <node pkg="path_to_trajectory" exec="csv_to_trajectory_node" name="csv_to_trajectory" output="screen">
+        <param name="csv_file_path" value="$(find-pkg-share booars_launch)/map/csv/traj_mincurv_3.0m.csv"/>
+        <param name="velocity_rate" value="1.0"/>
+        <param name="trajectory_length" value="200.0"/>
+        <param name="trajectory_margin" value="2.0"/>
+        <param name="next_point_threshold" value="10.0"/>
+        <param name="z_position" value="0.0"/>
         <remap from="output" to="/planning/scenario_planning/trajectory"/>
-        <!-- 減速度 -->
-        <param name="deceleration" value="-14.0"/>
-        <!-- ピットの何メートル前で速度を0にするか -->
-        <param name="stop_offset" value="1.5"/>
-        <!-- 最高速度 -->
-        <param name="max_speed" value="30.0"/>
-        <!-- trajectoryの点の間隔 -->
-        <param name="traj_width" value="1.0"/>
+        <remap from="in_odom" to="/localization/kinematic_state"/>
+        <remap from="now_waypoint" to="/now_waypoint"/>
       </node>
 
     </group>
