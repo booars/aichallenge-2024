@@ -25,6 +25,10 @@
 #include <string>
 #include <vector>
 
+#include <pcl/point_cloud.h>
+#include <pcl/point_types.h>
+#include <pcl/kdtree/kdtree_flann.h>
+
 class CsvToTrajectory : public rclcpp::Node {
 public:
   using Trajectory = autoware_auto_planning_msgs::msg::Trajectory;
@@ -44,6 +48,10 @@ private:
   float next_point_threshold_ = 30.0f;
   int now_index_ = 0;
   float z_position_ = 0.0f;
+
+  pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_;
+  pcl::KdTreeFLANN<pcl::PointXYZ> kdtree_;
+
 
   void odomCallback(const nav_msgs::msg::Odometry::SharedPtr odometry);
   void readCsv(const std::string& csv_file_path);

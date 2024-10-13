@@ -17,7 +17,9 @@
 #include <cmath>
 
 
-CsvToTrajectory::CsvToTrajectory() : Node("csv_to_trajectory_node") {
+CsvToTrajectory::CsvToTrajectory() : Node("csv_to_trajectory_node")
+, cloud_(new pcl::PointCloud<pcl::PointXYZ>())
+ {
   using std::placeholders::_1;
   this->declare_parameter<std::string>("csv_file_path", "");
   this->declare_parameter<float>("velocity_rate", 1.0f);
@@ -78,6 +80,7 @@ void CsvToTrajectory::readCsv(const std::string& file_path) {
     trajectory_points_.push_back(point);
     old_x = point.pose.position.x;
     old_y = point.pose.position.y;
+    cloud_->points.push_back(pcl::PointXYZ(point.pose.position.x, point.pose.position.y, z_position_));
   }
   double yaw = std::atan2(trajectory_points_.front().pose.position.y-old_y, trajectory_points_.front().pose.position.x-old_x);
   trajectory_points_.front().pose.orientation.x = 0.0;
@@ -85,6 +88,9 @@ void CsvToTrajectory::readCsv(const std::string& file_path) {
   trajectory_points_.front().pose.orientation.z = sin(yaw / 2);
   trajectory_points_.front().pose.orientation.w = cos(yaw / 2);
   RCLCPP_INFO(this->get_logger(), "Loaded %zu trajectory points", trajectory_points_.size());
+
+  kdtree_.setInputCloud(cloud_);
+  
 }
 
 void CsvToTrajectory::odomCallback(const nav_msgs::msg::Odometry::SharedPtr odometry)
@@ -94,19 +100,24 @@ void CsvToTrajectory::odomCallback(const nav_msgs::msg::Odometry::SharedPtr odom
   Trajectory trajectory;
   // Set trajectory header
   trajectory.header = odometry->header;
-  while(true){
-    const float dis = std::hypot(
-        trajectory_points_[current_point_index_].pose.position.x - odometry->pose.pose.position.x,
-        trajectory_points_[current_point_index_].pose.position.y - odometry->pose.pose.position.y);
-    if(dis > next_point_threshold_){
-      break;
-    }
-    current_point_index_++;
+
+  const int K = 1; // 1点のみ取得
+  std::vector<int> pointIdxNKNSearch(K);
+  std::vector<float> pointNKNSquaredDistance(K);
+  pcl::PointXYZ searchPoint(odometry->pose.pose.position.x, odometry->pose.pose.position.y, z_position_);
+
+  if (kdtree_.nearestKSearch(searchPoint, K, pointIdxNKNSearch, pointNKNSquaredDistance) > 0)
+  {
+      std::cout << "The closest point index: " << pointIdxNKNSearch[0] << std::endl;
+      std::cout << "Distance: " << pointNKNSquaredDistance[0] << std::endl;
   }
-  // const int start_index = std::max(0, int(current_point_index_ - (2.0*next_point_threshold_)/trajectory_margin_));
-  // const int end_index = std::min(int(trajectory_points_.size()), int(current_point_index_ + trajectory_length_/trajectory_margin_));
-  const int start_index = 0;
-  const int end_index = trajectory_points_.size();
+  else
+  {
+      std::cout << "No neighbors found!" << std::endl;
+      return;
+  }
+  const int start_index = pointIdxNKNSearch[0];
+  const int end_index = pointIdxNKNSearch[0]+20;
   for(int i = start_index; i < end_index; i++){
     trajectory.points.push_back(trajectory_points_[i]);
   }
