@@ -45,7 +45,7 @@ private:
   float velocity_rate_ = 1.0f;
   float trajectory_length_ = 200.0f;
   float trajectory_margin_ = 2.0f;
-  float next_point_threshold_ = 30.0f;
+  float trajectory_rear_length_ = 30.0f;
   int now_index_ = 0;
   float z_position_ = 0.0f;
 

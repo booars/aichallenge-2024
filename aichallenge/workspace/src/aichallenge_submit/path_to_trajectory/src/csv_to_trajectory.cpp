@@ -25,7 +25,7 @@ CsvToTrajectory::CsvToTrajectory() : Node("csv_to_trajectory_node")
   this->declare_parameter<float>("velocity_rate", 1.0f);
   this->declare_parameter<float>("trajectory_length", 100.0f);
   this->declare_parameter<float>("trajectory_margin", 2.0f);
-  this->declare_parameter<float>("next_point_threshold", 30.0f);
+  this->declare_parameter<float>("trajectory_rear_length", 10.0f);
   this->declare_parameter<float>("z_position", 0.0f);
 
   std::string csv_file_path;
@@ -33,7 +33,7 @@ CsvToTrajectory::CsvToTrajectory() : Node("csv_to_trajectory_node")
   this->get_parameter("velocity_rate", this->velocity_rate_);
   this->get_parameter("trajectory_length", this->trajectory_length_);
   this->get_parameter("trajectory_margin", this->trajectory_margin_);
-  this->get_parameter("next_point_threshold", this->next_point_threshold_);
+  this->get_parameter("trajectory_rear_length", this->trajectory_rear_length_);
   this->get_parameter("z_position", this->z_position_);
 
   if (csv_file_path.empty()) {
@@ -64,7 +64,7 @@ void CsvToTrajectory::readCsv(const std::string& file_path) {
     while (getline(s, field, ',')) {
       values.push_back(std::stod(field));
     }
-    // s_m; x_m; y_m; psi_rad; kappa_radpm; vx_mps; ax_mps2
+    // x,y,z,yaw
     TrajectoryPoint point;
     point.pose.position.x = values[0];
     point.pose.position.y = values[1];
@@ -116,15 +116,18 @@ void CsvToTrajectory::odomCallback(const nav_msgs::msg::Odometry::SharedPtr odom
       std::cout << "No neighbors found!" << std::endl;
       return;
   }
-  const int start_index = pointIdxNKNSearch[0];
-  const int end_index = pointIdxNKNSearch[0]+20;
-  for(int i = start_index; i < end_index; i++){
-    trajectory.points.push_back(trajectory_points_[i]);
+  const int start_index = pointIdxNKNSearch[0]- std::round(trajectory_rear_length_/trajectory_margin_);
+  const int points_num = std::round(trajectory_length_/trajectory_margin_)+std::round(trajectory_rear_length_/trajectory_margin_);
+  for(int i = 0; i < points_num; i++){
+    int p = start_index + i;
+    if(p>=trajectory_points_.size()){
+      p-=trajectory_points_.size();
+    }
+    else if(p<0){
+      p+=trajectory_points_.size();
+    }
+    trajectory.points.push_back(trajectory_points_[p]);
   }
-  //RCLCPP_INFO(this->get_logger(), "Now waypoint: %d", int(start_index+next_point_threshold_/trajectory_margin_));
-  std_msgs::msg::Int32 now_point;
-  now_point.data = int(current_point_index_ - (next_point_threshold_)/trajectory_margin_);
-  pub_now_point_->publish(now_point);
   pub_->publish(trajectory);
 }
 

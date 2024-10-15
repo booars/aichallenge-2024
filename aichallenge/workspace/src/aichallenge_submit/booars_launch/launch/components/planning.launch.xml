@@ -97,9 +97,9 @@
       <node pkg="path_to_trajectory" exec="csv_to_trajectory_node" name="csv_to_trajectory" output="screen">
         <param name="csv_file_path" value="$(find-pkg-share booars_launch)/map/csv/traj_mincurv_3.0m.csv"/>
         <param name="velocity_rate" value="1.0"/>
-        <param name="trajectory_length" value="200.0"/>
+        <param name="trajectory_length" value="150.0"/>
         <param name="trajectory_margin" value="2.0"/>
-        <param name="next_point_threshold" value="10.0"/>
+        <param name="trajectory_rear_length" value="20.0"/>
         <param name="z_position" value="0.0"/>
         <remap from="output" to="/planning/scenario_planning/trajectory"/>
         <remap from="in_odom" to="/localization/kinematic_state"/>
