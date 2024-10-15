@@ -42,7 +42,7 @@ private:
   rclcpp::Publisher<std_msgs::msg::Int32>::SharedPtr pub_now_point_;
   std::vector<TrajectoryPoint> trajectory_points_;
   size_t current_point_index_ = 0;
-  float velocity_rate_ = 1.0f;
+  float velocity_ = 1.0f;
   float trajectory_length_ = 200.0f;
   float trajectory_margin_ = 2.0f;
   float trajectory_rear_length_ = 30.0f;

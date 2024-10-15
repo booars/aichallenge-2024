@@ -96,14 +96,18 @@
 
       <node pkg="path_to_trajectory" exec="csv_to_trajectory_node" name="csv_to_trajectory" output="screen">
         <param name="csv_file_path" value="$(find-pkg-share booars_launch)/map/csv/traj_mincurv_3.0m.csv"/>
-        <param name="velocity_rate" value="1.0"/>
+        <!-- trajectoryの速度設定 -->
+        <param name="velocity" value="30.0"/>
+        <!-- 車両前方のtrajectoryの長さ -->
         <param name="trajectory_length" value="150.0"/>
-        <param name="trajectory_margin" value="2.0"/>
+        <!-- 車両後方のtrajectoryの長さ -->
         <param name="trajectory_rear_length" value="20.0"/>
+        <!-- trajectoryの間隔 -->
+        <param name="trajectory_margin" value="2.0"/>
+        <!-- pose.position.zの値 -->
         <param name="z_position" value="0.0"/>
         <remap from="output" to="/planning/scenario_planning/trajectory"/>
         <remap from="in_odom" to="/localization/kinematic_state"/>
-        <remap from="now_waypoint" to="/now_waypoint"/>
       </node>
 
     </group>
