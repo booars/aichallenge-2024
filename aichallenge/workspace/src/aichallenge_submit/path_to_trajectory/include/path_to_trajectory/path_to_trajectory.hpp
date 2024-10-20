@@ -36,6 +36,7 @@ class PathToTrajectory : public rclcpp::Node {
   double stop_offset_;
   double max_speed_;
   double traj_width_;
+  bool is_stop_;
 };
 
 #endif  // PATH_TO_TRAJECTORY__PATH_TO_TRAJECTORY_HPP_

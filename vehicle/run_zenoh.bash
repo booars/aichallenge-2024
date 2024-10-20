@@ -7,4 +7,4 @@ docker run --rm \
     -e CYCLONEDDS_URI=file:///vehicle/cyclonedds.xml \
     -v "${SCRIPT_DIR}:/vehicle" \
     --name zenoh \
-    eclipse/zenoh-bridge-ros2dds:latest -c /vehicle/zenoh.json5
+    eclipse/zenoh-bridge-ros2dds:latest -e tcp/192.168.11.60:7447

@@ -99,13 +99,14 @@
         <remap from="input" to="/planning/scenario_planning/lane_driving/behavior_planning/path_with_lane_id"/>
         <remap from="output" to="/planning/scenario_planning/trajectory"/>
         <!-- 減速度 -->
-        <param name="deceleration" value="-14.0"/>
+        <param name="deceleration" value="-24.0"/>
         <!-- ピットの何メートル前で速度を0にするか -->
-        <param name="stop_offset" value="1.5"/>
+        <param name="stop_offset" value="0.0"/>
         <!-- 最高速度 -->
         <param name="max_speed" value="30.0"/>
         <!-- trajectoryの点の間隔 -->
         <param name="traj_width" value="1.0"/>
+        <param name="is_stop" value="false"/>
       </node>
 
     </group>
