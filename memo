@@ -1,0 +1,6 @@
+ros2 param set /planning/mppi_controller_node V_MAX 4.0
+ros2 param set /control/simple_pure_pursuit_node curve_param_deceleration_vel 4.0
+ros2 param set /control/simple_pure_pursuit_node curve_param_max_steer_angle 0.2
+ros2 param set /planning/scenario_planning/csv_to_trajectory velocity_coef 1.0
+
+rviz2 -d workspace/src/aichallenge_system/aichallenge_system_launch/config/debug_sensing.rviz

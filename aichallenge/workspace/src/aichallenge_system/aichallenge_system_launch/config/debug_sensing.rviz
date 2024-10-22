@@ -6,22 +6,14 @@ Panels:
       Expanded:
         - /System1/TF1
         - /System1/Grid1
-        - /Map1
         - /Sensing1/LiDAR1/ConcatenatePointCloud1/Autocompute Value Bounds1
         - /Sensing1/GNSS1/PoseWithCovariance1
         - /Sensing1/Odometry1/Shape1
         - /Sensing1/BaseLink1
         - /Sensing1/GNSSLink1
         - /Sensing1/Sensorkit1
-        - /Localization1
         - /Localization1/EKF1/PoseHistory1
-        - /Planning1
-        - /Planning1/ScenarioPlanning1/ScenarioTrajectory1/View Path1
-        - /Planning1/ScenarioPlanning1/ScenarioTrajectory1/View Velocity1
-        - /Planning1/ScenarioPlanning1/LaneDriving1
-        - /Planning1/MPPITrajectory1
-        - /Trajectory1
-        - /Trajectory1/Topic1
+        - /Planning1/MPPITrajectory1/View Path1
       Splitter Ratio: 0.557669460773468
     Tree Height: 385
   - Class: rviz_common/Selection
@@ -705,7 +697,7 @@ Visualization Manager:
         - Class: rviz_common/Group
           Displays:
             - Class: rviz_plugins/Trajectory
-              Color Border Vel Max: 3
+              Color Border Vel Max: 8
               Enabled: true
               Name: ScenarioTrajectory
               Topic:
@@ -722,14 +714,14 @@ Visualization Manager:
                 Offset from BaseLink: 0
                 Rear Overhang: 1.0299999713897705
                 Value: false
-                Vehicle Length: 4.769999980926514
-                Vehicle Width: 1.8300000429153442
+                Vehicle Length: 3
+                Vehicle Width: 1
               View Path:
-                Alpha: 0.9990000128746033
+                Alpha: 1
                 Color: 0; 0; 0
                 Constant Color: false
                 Value: true
-                Width: 0.30000001192092896
+                Width: 1
               View Point:
                 Alpha: 1
                 Color: 0; 60; 255
@@ -1839,6 +1831,47 @@ Visualization Manager:
             Constant Color: false
             Scale: 0.30000001192092896
             Value: true
+        - Class: rviz_plugins/Trajectory
+          Color Border Vel Max: 8.300000190734863
+          Enabled: false
+          Name: Trajectory
+          Topic:
+            Depth: 15
+            Durability Policy: Volatile
+            Filter size: 10
+            History Policy: Keep Last
+            Reliability Policy: Reliable
+            Value: /planning/debug/path
+          Value: false
+          View Footprint:
+            Alpha: 1
+            Color: 230; 230; 50
+            Offset from BaseLink: 0
+            Rear Overhang: 1.0299999713897705
+            Value: false
+            Vehicle Length: 4.769999980926514
+            Vehicle Width: 1.8300000429153442
+          View Path:
+            Alpha: 1
+            Color: 0; 0; 0
+            Constant Color: false
+            Value: true
+            Width: 1
+          View Point:
+            Alpha: 1
+            Color: 0; 60; 255
+            Offset: 0
+            Radius: 0.10000000149011612
+            Value: false
+          View Text Velocity:
+            Scale: 0.30000001192092896
+            Value: false
+          View Velocity:
+            Alpha: 1
+            Color: 0; 0; 0
+            Constant Color: false
+            Scale: 0.30000001192092896
+            Value: true
       Enabled: true
       Name: Planning
     - Class: rviz_common/Group
@@ -1905,47 +1938,6 @@ Visualization Manager:
         Reliability Policy: Reliable
         Value: /simple_pure_pursuit_node/debug/markers
       Value: true
-    - Class: rviz_plugins/Trajectory
-      Color Border Vel Max: 8.300000190734863
-      Enabled: true
-      Name: Trajectory
-      Topic:
-        Depth: 15
-        Durability Policy: Volatile
-        Filter size: 10
-        History Policy: Keep Last
-        Reliability Policy: Reliable
-        Value: /planning/debug/path
-      Value: true
-      View Footprint:
-        Alpha: 1
-        Color: 230; 230; 50
-        Offset from BaseLink: 0
-        Rear Overhang: 1.0299999713897705
-        Value: false
-        Vehicle Length: 4.769999980926514
-        Vehicle Width: 1.8300000429153442
-      View Path:
-        Alpha: 1
-        Color: 0; 0; 0
-        Constant Color: false
-        Value: true
-        Width: 1
-      View Point:
-        Alpha: 1
-        Color: 0; 60; 255
-        Offset: 0
-        Radius: 0.10000000149011612
-        Value: false
-      View Text Velocity:
-        Scale: 0.30000001192092896
-        Value: false
-      View Velocity:
-        Alpha: 1
-        Color: 0; 0; 0
-        Constant Color: false
-        Scale: 0.30000001192092896
-        Value: true
   Enabled: true
   Global Options:
     Background Color: 10; 10; 10
@@ -2046,11 +2038,11 @@ Visualization Manager:
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Scale: 14.891090393066406
+      Scale: 31.983718872070312
       Target Frame: base_link
       Value: TopDownOrtho (rviz_default_plugins)
-      X: 0
-      Y: 0
+      X: -2.4108195304870605
+      Y: -1.57545006275177
     Saved:
       - Class: rviz_default_plugins/ThirdPersonFollower
         Distance: 18
