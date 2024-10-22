@@ -154,6 +154,8 @@
     "xyzrpy",
     "zcvf",
     "zenoh",
-    "zenohd"
+    "zenohd",
+    "coef",
+    "radpm"
   ]
 }
