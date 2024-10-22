@@ -95,9 +95,9 @@
       </group> <!-- lane_driving -->
 
       <node pkg="path_to_trajectory" exec="csv_to_trajectory_node" name="csv_to_trajectory" output="screen">
-        <param name="csv_file_path" value="$(find-pkg-share booars_launch)/map/csv/traj_mincurv_3.0m.csv"/>
-        <!-- trajectoryの速度設定 -->
-        <param name="velocity" value="30.0"/>
+        <param name="csv_file_path" value="$(find-pkg-share booars_launch)/map/csv/traj_race_cl.csv"/>
+        <!-- csvから読み込んだ速度に掛ける係数 -->
+        <param name="velocity_coef" value="1.0"/>
         <!-- 車両前方のtrajectoryの長さ -->
         <param name="trajectory_length" value="150.0"/>
         <!-- 車両後方のtrajectoryの長さ -->

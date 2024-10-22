@@ -22,7 +22,7 @@ CsvToTrajectory::CsvToTrajectory() : Node("csv_to_trajectory_node")
  {
   using std::placeholders::_1;
   this->declare_parameter<std::string>("csv_file_path", "");
-  this->declare_parameter<float>("velocity", 30.0f);
+  this->declare_parameter<float>("velocity_coef", 30.0f);
   this->declare_parameter<float>("trajectory_length", 100.0f);
   this->declare_parameter<float>("trajectory_margin", 2.0f);
   this->declare_parameter<float>("trajectory_rear_length", 10.0f);
@@ -30,11 +30,9 @@ CsvToTrajectory::CsvToTrajectory() : Node("csv_to_trajectory_node")
 
   std::string csv_file_path;
   this->get_parameter("csv_file_path", csv_file_path);
-  this->get_parameter("velocity", this->velocity_);
   this->get_parameter("trajectory_length", this->trajectory_length_);
-  this->get_parameter("trajectory_margin", this->trajectory_margin_);
-  this->get_parameter("trajectory_rear_length", this->trajectory_rear_length_);
   this->get_parameter("z_position", this->z_position_);
+  dynamicLoadParam();
 
   if (csv_file_path.empty()) {
       RCLCPP_ERROR(this->get_logger(), "No CSV file path provided");
@@ -48,6 +46,12 @@ CsvToTrajectory::CsvToTrajectory() : Node("csv_to_trajectory_node")
   this->pub_now_point_ = this->create_publisher<std_msgs::msg::Int32>("now_waypoint", 1);
   this->readCsv(csv_file_path);
 
+}
+
+void CsvToTrajectory::dynamicLoadParam(){
+  this->get_parameter("velocity_coef", this->velocity_coef_);
+  this->get_parameter("trajectory_margin", this->trajectory_margin_);
+  this->get_parameter("trajectory_rear_length", this->trajectory_rear_length_);
 }
 
 void CsvToTrajectory::readCsv(const std::string& file_path) {
@@ -66,15 +70,16 @@ void CsvToTrajectory::readCsv(const std::string& file_path) {
     }
     // x,y,z,yaw
     TrajectoryPoint point;
-    point.pose.position.x = values[0];
-    point.pose.position.y = values[1];
+    point.pose.position.x = values[1];
+    point.pose.position.y = values[2];
     point.pose.position.z = z_position_;
-    double yaw = std::atan2(point.pose.position.y-old_y, point.pose.position.x-old_x);
+    //const double yaw = std::atan2(point.pose.position.y-old_y, point.pose.position.x-old_x);
+    const double yaw = values[3];
     point.pose.orientation.x = 0.0;
     point.pose.orientation.y = 0.0;
     point.pose.orientation.z = sin(yaw / 2);
     point.pose.orientation.w = cos(yaw / 2);
-    point.longitudinal_velocity_mps = velocity_;//values[5] * this->velocity_;
+    point.longitudinal_velocity_mps = values[5];
     point.acceleration_mps2 = 0.0; //values[6];
 
     trajectory_points_.push_back(point);
@@ -82,11 +87,11 @@ void CsvToTrajectory::readCsv(const std::string& file_path) {
     old_y = point.pose.position.y;
     cloud_->points.push_back(pcl::PointXYZ(point.pose.position.x, point.pose.position.y, z_position_));
   }
-  double yaw = std::atan2(trajectory_points_.front().pose.position.y-old_y, trajectory_points_.front().pose.position.x-old_x);
-  trajectory_points_.front().pose.orientation.x = 0.0;
-  trajectory_points_.front().pose.orientation.y = 0.0;
-  trajectory_points_.front().pose.orientation.z = sin(yaw / 2);
-  trajectory_points_.front().pose.orientation.w = cos(yaw / 2);
+  // double yaw = std::atan2(trajectory_points_.front().pose.position.y-old_y, trajectory_points_.front().pose.position.x-old_x);
+  // trajectory_points_.front().pose.orientation.x = 0.0;
+  // trajectory_points_.front().pose.orientation.y = 0.0;
+  // trajectory_points_.front().pose.orientation.z = sin(yaw / 2);
+  // trajectory_points_.front().pose.orientation.w = cos(yaw / 2);
   RCLCPP_INFO(this->get_logger(), "Loaded %zu trajectory points", trajectory_points_.size());
 
   kdtree_.setInputCloud(cloud_);
@@ -96,6 +101,8 @@ void CsvToTrajectory::readCsv(const std::string& file_path) {
 void CsvToTrajectory::odomCallback(const nav_msgs::msg::Odometry::SharedPtr odometry)
 {
   if (current_point_index_ >= trajectory_points_.size()) return;
+
+  dynamicLoadParam();
 
   Trajectory trajectory;
   // Set trajectory header
@@ -127,6 +134,9 @@ void CsvToTrajectory::odomCallback(const nav_msgs::msg::Odometry::SharedPtr odom
       p-=(trajectory_points_.size());
     }
     trajectory.points.push_back(trajectory_points_[p]);
+  }
+  for(auto && p : trajectory.points){
+    p.longitudinal_velocity_mps*=this->velocity_coef_;
   }
   pub_->publish(trajectory);
 }
