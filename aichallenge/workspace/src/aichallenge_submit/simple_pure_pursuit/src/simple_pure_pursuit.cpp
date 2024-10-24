@@ -156,7 +156,7 @@ void SimplePurePursuit::onTimer()
   pub_cmd_->publish(cmd);
 
   // publish real-machine command
-  cmd.lateral.steering_tire_angle /=  steering_tire_angle_gain_;
+  //cmd.lateral.steering_tire_angle /=  steering_tire_angle_gain_;
   pub_raw_cmd_->publish(cmd);
 }
 
