@@ -7,19 +7,21 @@
   <group>
     <push-ros-namespace namespace="control" />
 
-    <let name="steering_tire_angle_gain_var" value="1.0" if="$(var simulation)" />
-    <let name="steering_tire_angle_gain_var" value="1.639" unless="$(var simulation)" />
+
+    <let name="steering_tire_angle_gain_var" value="1.1" if="$(var simulation)" />
+    <!-- <let name="steering_tire_angle_gain_var" value="1.0" if="$(var simulation)" /> -->
+    <!-- <let name="steering_tire_angle_gain_var" value="1.639" unless="$(var simulation)" /> -->
 
     <node pkg="simple_pure_pursuit" exec="simple_pure_pursuit" name="simple_pure_pursuit_node"
       output="screen" unless="$(var use_stanley)">
       <param name="use_external_target_vel" value="false" />
       <param name="external_target_vel" value="8.3" />
-      <param name="lookahead_gain" value="0.25" />
-      <param name="lookahead_min_distance" value="1.6" />
+      <param name="lookahead_gain" value="0.6" />
+      <param name="lookahead_min_distance" value="4.0" />
       <param name="speed_proportional_gain" value="3.0" />
       <param name="steering_tire_angle_gain" value="$(var steering_tire_angle_gain_var)"/>
-      <param name="curve_param_max_steer_angle" value="0.1" />
-      <param name="curve_param_deceleration_vel" value="4.0" />
+      <param name="curve_param_max_steer_angle" value="0.25" />
+      <param name="curve_param_deceleration_vel" value="3.0" />
       <remap from="input/kinematics" to="/localization/kinematic_state" />
       <!-- global path or mppi-->
       <remap from="input/trajectory" to="/planning/output/mppi_planned_path" />

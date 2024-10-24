@@ -74,7 +74,7 @@ void CsvToTrajectory::readCsv(const std::string& file_path) {
     point.pose.position.y = values[2];
     point.pose.position.z = z_position_;
     //const double yaw = std::atan2(point.pose.position.y-old_y, point.pose.position.x-old_x);
-    const double yaw = values[3];
+    const double yaw = values[3] + M_PI/2;
     point.pose.orientation.x = 0.0;
     point.pose.orientation.y = 0.0;
     point.pose.orientation.z = sin(yaw / 2);

@@ -78,11 +78,12 @@ void SimplePurePursuit::onTimer()
     RCLCPP_INFO_THROTTLE(get_logger(), *get_clock(), 1000 /*ms*/, "reached to the goal");
   } else {
     // get closest trajectory point from current position
-    TrajectoryPoint closet_traj_point = trajectory_->points.at(closet_traj_point_idx);
+    //TrajectoryPoint closet_traj_point = trajectory_->points.at(closet_traj_point_idx);
 
     // calc lateral control
     //// calc lookahead distance
-    double lookahead_distance = lookahead_gain_ * closet_traj_point.longitudinal_velocity_mps + lookahead_min_distance_;
+    // double lookahead_distance = lookahead_gain_ * closet_traj_point.longitudinal_velocity_mps + lookahead_min_distance_;
+    double lookahead_distance = lookahead_gain_ * odometry_->twist.twist.linear.x + lookahead_min_distance_;
     //// calc center coordinate of rear wheel
     double rear_x = odometry_->pose.pose.position.x -
                     wheel_base_ / 2.0 * std::cos(odometry_->pose.pose.orientation.z);
@@ -112,14 +113,14 @@ void SimplePurePursuit::onTimer()
       marker_msg.action = visualization_msgs::msg::Marker::ADD;
       marker_msg.pose.position.x = lookahead_point_x;
       marker_msg.pose.position.y = lookahead_point_y;
-      marker_msg.pose.position.z = 80;
+      marker_msg.pose.position.z = 0.0;
       marker_msg.pose.orientation.x = 0.0;
       marker_msg.pose.orientation.y = 0.0;
       marker_msg.pose.orientation.z = 0.0;
       marker_msg.pose.orientation.w = 1.0;
-      marker_msg.scale.x = 3.0;
-      marker_msg.scale.y = 3.0;
-      marker_msg.scale.z = 3.0;
+      marker_msg.scale.x = 1.5;
+      marker_msg.scale.y = 1.5;
+      marker_msg.scale.z = 1.5;
       marker_msg.color.r = 1.0f;
       marker_msg.color.g = 0.0f;
       marker_msg.color.b = 0.0f;
@@ -140,7 +141,6 @@ void SimplePurePursuit::onTimer()
     // calc longitudinal speed and acceleration
     double target_longitudinal_vel =
       use_external_target_vel_ ? external_target_vel_ : lookahead_point_itr->longitudinal_velocity_mps;
-    double current_longitudinal_vel = odometry_->twist.twist.linear.x;
 
     // ステアリング角度が大きい場合は減速する
     if (std::abs(cmd.lateral.steering_tire_angle) > curve_param_max_steer_angle_) {
@@ -149,14 +149,14 @@ void SimplePurePursuit::onTimer()
     
     cmd.longitudinal.speed = target_longitudinal_vel;
     cmd.longitudinal.acceleration =
-      speed_proportional_gain_ * (target_longitudinal_vel - current_longitudinal_vel);
+      speed_proportional_gain_ * (target_longitudinal_vel - odometry_->twist.twist.linear.x);
 
   }
 
   pub_cmd_->publish(cmd);
 
   // publish real-machine command
-  cmd.lateral.steering_tire_angle /=  steering_tire_angle_gain_;
+  //cmd.lateral.steering_tire_angle /=  steering_tire_angle_gain_;
   pub_raw_cmd_->publish(cmd);
 }
 
