@@ -2,7 +2,7 @@
   ros__parameters:
       # mppi
       horizon : 25
-      num_samples : 2500
+      num_samples : 3000
       u_min : [-2.0, -0.25] # accel(m/s2), steer angle(rad)
       u_max : [2.0, 0.25]
       sigmas : [2.0, 0.25] # sample range
@@ -13,9 +13,9 @@
       lookahead_distance : 0.1
       reference_path_interval : 0.83
       # cost weights
-      Qc : 20.0
+      Qc : 10.0
       Ql : 1.0
-      Qv : 10.0
+      Qv : 20.0
       Qo : 1000.0
       Qin : 0.01
       Qdin : 0.0

@@ -15,7 +15,7 @@
       <param name="use_external_target_vel" value="false" />
       <param name="external_target_vel" value="8.3" />
       <param name="lookahead_gain" value="0.6" />
-      <param name="lookahead_min_distance" value="2.0" />
+      <param name="lookahead_min_distance" value="4.0" />
       <param name="speed_proportional_gain" value="3.0" />
       <param name="steering_tire_angle_gain" value="$(var steering_tire_angle_gain_var)"/>
       <param name="curve_param_max_steer_angle" value="0.15" />
